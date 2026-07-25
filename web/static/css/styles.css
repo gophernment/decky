@@ -190,6 +190,23 @@ body {
   /* By default let CSS grid place them */
 }
 
+/* Images must never exceed the slide's own vertical space. --slide-height
+   is a fixed px value set per-deck (see presentation/export/presenter
+   templates), so it stays correct regardless of how the slide is scaled
+   or how much room the title above the image consumes. Without this cap,
+   a full-resolution image renders past the bottom edge of the slide,
+   because percentage heights don't resolve when the image is wrapped in
+   an auto-height <p> (goldmark's default markdown-image output). */
+.slide img {
+  max-width: 100%;
+  max-height: calc(var(--slide-height) * 0.6);
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+}
+
 /* Styling common elements inside slides */
 p {
   font-size: 1.15rem;

@@ -556,21 +556,28 @@ func extractSpeakerNotes(markdown string) (string, string) {
 	if startIdx == -1 {
 		return "", strings.TrimSpace(markdown)
 	}
-	endIdx := strings.Index(markdown[startIdx:], "-->")
-	if endIdx == -1 {
-		return "", strings.TrimSpace(markdown)
-	}
-	endIdx += startIdx
 
-	// Ensure that only whitespace or newlines are present after the closing --> tag
-	afterComment := markdown[endIdx+3:]
-	if strings.TrimSpace(afterComment) != "" {
-		return "", strings.TrimSpace(markdown)
-	}
+	// Scan candidate "-->" occurrences left to right and accept the first
+	// one after which only whitespace remains. A single Index lookup isn't
+	// enough: speaker notes commonly contain ASCII-art arrows like "--->",
+	// which itself contains "-->" as a substring, so the real closing tag
+	// can be preceded by false matches inside the notes body.
+	searchFrom := startIdx
+	for {
+		relIdx := strings.Index(markdown[searchFrom:], "-->")
+		if relIdx == -1 {
+			return "", strings.TrimSpace(markdown)
+		}
+		endIdx := searchFrom + relIdx
 
-	notes := markdown[startIdx+4 : endIdx]
-	cleanMarkdown := markdown[:startIdx] + markdown[endIdx+3:]
-	return strings.TrimSpace(notes), strings.TrimSpace(cleanMarkdown)
+		afterComment := markdown[endIdx+3:]
+		if strings.TrimSpace(afterComment) == "" {
+			notes := markdown[startIdx+4 : endIdx]
+			cleanMarkdown := markdown[:startIdx] + markdown[endIdx+3:]
+			return strings.TrimSpace(notes), strings.TrimSpace(cleanMarkdown)
+		}
+		searchFrom = endIdx + 3
+	}
 }
 
 var listItemOpenTagRegex = regexp.MustCompile(`<li>`)
