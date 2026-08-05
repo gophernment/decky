@@ -2,6 +2,8 @@ package parser
 
 import (
 	"bytes"
+	"fmt"
+	"html/template"
 	"math"
 	"net/url"
 	"os"
@@ -118,6 +120,13 @@ type Slide struct {
 	// HeadingColors overrides the deck-wide default (Presentation.HeadingColors)
 	// per heading level, for this slide only. See mergeHeadingColors (Task 2).
 	HeadingColors map[string]string `yaml:"headingColors"`
+
+	// HeadingColorCSS is computed (not user-set) from the merge of
+	// Presentation.HeadingColors and this slide's own HeadingColors. It is
+	// a scoped CSS rule set (one rule per heading level with a color or
+	// gradient set), emitted as an inline <style> block by
+	// web/templates/_slide.html. Empty if no heading colors apply.
+	HeadingColorCSS template.CSS
 
 	// Fragments, when true, numbers every <li> rendered from this slide's
 	// markdown (in document order) and marks it with class="fragment" so
@@ -276,6 +285,9 @@ func ParseMarkdownFile(path string) (*Presentation, error) {
 			slide.RowsCSS = ratioToGridTemplate(slide.Rows, 2)
 		}
 
+		merged := mergeHeadingColors(pres.HeadingColors, slide.HeadingColors)
+		slide.HeadingColorCSS = buildHeadingColorCSS(slide.Index, merged)
+
 		pres.Slides = append(pres.Slides, slide)
 		slideIdx++
 	}
@@ -331,6 +343,62 @@ func buildGoogleFontsURL(pres *Presentation) string {
 		params[i] = "family=" + url.QueryEscape(f)
 	}
 	return "https://fonts.googleapis.com/css2?" + strings.Join(params, "&") + "&display=swap"
+}
+
+// headingLevels are the heading levels headingColors recognizes, in the
+// order their CSS rules are emitted.
+var headingLevels = []string{"h1", "h2", "h3", "h4"}
+
+// mergeHeadingColors merges a slide's local headingColors over the deck's
+// global headingColors, per level: a level set locally wins; otherwise the
+// global value (if any) is used. Levels absent from both maps are omitted
+// from the result.
+func mergeHeadingColors(global, local map[string]string) map[string]string {
+	merged := make(map[string]string, len(headingLevels))
+	for _, level := range headingLevels {
+		if v, ok := local[level]; ok && v != "" {
+			merged[level] = v
+			continue
+		}
+		if v, ok := global[level]; ok && v != "" {
+			merged[level] = v
+		}
+	}
+	return merged
+}
+
+// isGradientValue reports whether a headingColors value is a CSS gradient
+// (linear-gradient, radial-gradient, conic-gradient, or their repeating-*
+// variants) rather than a solid color.
+func isGradientValue(value string) bool {
+	return strings.Contains(strings.ToLower(value), "gradient(")
+}
+
+// buildHeadingColorCSS generates a scoped CSS rule set for a slide's merged
+// headingColors, one rule per level, scoped to that slide's DOM id
+// (#slide-N, matching web/templates/_slide.html's `id="slide-{{ .Index }}"`).
+// Solid colors set `color`; gradients use the background-clip:text
+// technique so the gradient paints the glyph shapes instead of a solid
+// background box. Returns "" if merged is empty.
+func buildHeadingColorCSS(slideIndex int, merged map[string]string) template.CSS {
+	if len(merged) == 0 {
+		return ""
+	}
+	var b strings.Builder
+	for _, level := range headingLevels {
+		value, ok := merged[level]
+		if !ok {
+			continue
+		}
+		fmt.Fprintf(&b, "#slide-%d %s { ", slideIndex, level)
+		if isGradientValue(value) {
+			fmt.Fprintf(&b, "background: %s; -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent;", value)
+		} else {
+			fmt.Fprintf(&b, "color: %s;", value)
+		}
+		b.WriteString(" }\n")
+	}
+	return template.CSS(b.String())
 }
 
 // splitBySeparator splits the markdown content by lines that are exactly "---".

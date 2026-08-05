@@ -1468,3 +1468,119 @@ headingColors:
 		}
 	})
 }
+
+func TestMergeHeadingColors(t *testing.T) {
+	global := map[string]string{"h1": "#111111", "h2": "#222222"}
+	local := map[string]string{"h1": "#facc15"}
+
+	merged := mergeHeadingColors(global, local)
+
+	if merged["h1"] != "#facc15" {
+		t.Errorf("Expected local h1 to win, got %q", merged["h1"])
+	}
+	if merged["h2"] != "#222222" {
+		t.Errorf("Expected h2 to fall back to global, got %q", merged["h2"])
+	}
+	if _, ok := merged["h3"]; ok {
+		t.Errorf("Expected h3 to be absent when unset in both maps, got %q", merged["h3"])
+	}
+}
+
+func TestBuildHeadingColorCSS(t *testing.T) {
+	t.Run("empty merged map returns empty CSS", func(t *testing.T) {
+		if css := buildHeadingColorCSS(3, map[string]string{}); css != "" {
+			t.Errorf("Expected empty CSS, got %q", css)
+		}
+	})
+
+	t.Run("solid color emits a color rule scoped to the slide id", func(t *testing.T) {
+		css := string(buildHeadingColorCSS(3, map[string]string{"h2": "#22d3ee"}))
+		want := "#slide-3 h2 { color: #22d3ee; }"
+		if !strings.Contains(css, want) {
+			t.Errorf("Expected CSS to contain %q, got %q", want, css)
+		}
+	})
+
+	t.Run("gradient value emits background-clip:text rules", func(t *testing.T) {
+		css := string(buildHeadingColorCSS(0, map[string]string{"h1": "linear-gradient(90deg, #f472b6, #60a5fa)"}))
+		for _, want := range []string{
+			"#slide-0 h1 { background: linear-gradient(90deg, #f472b6, #60a5fa);",
+			"-webkit-background-clip: text",
+			"background-clip: text",
+			"color: transparent",
+			"-webkit-text-fill-color: transparent",
+		} {
+			if !strings.Contains(css, want) {
+				t.Errorf("Expected CSS to contain %q, got %q", want, css)
+			}
+		}
+	})
+
+	t.Run("gradient detection is case-insensitive", func(t *testing.T) {
+		css := string(buildHeadingColorCSS(0, map[string]string{"h3": "RADIAL-GRADIENT(circle, red, blue)"}))
+		if !strings.Contains(css, "background: RADIAL-GRADIENT(circle, red, blue);") {
+			t.Errorf("Expected gradient technique for uppercase gradient value, got %q", css)
+		}
+	})
+
+	t.Run("rules are emitted in h1,h2,h3,h4 order regardless of map iteration order", func(t *testing.T) {
+		css := string(buildHeadingColorCSS(0, map[string]string{"h4": "#fbbf24", "h1": "#f472b6", "h3": "#a3e635"}))
+		i1 := strings.Index(css, "#slide-0 h1")
+		i3 := strings.Index(css, "#slide-0 h3")
+		i4 := strings.Index(css, "#slide-0 h4")
+		if !(i1 < i3 && i3 < i4) {
+			t.Errorf("Expected h1 < h3 < h4 order in output, got %q", css)
+		}
+	})
+}
+
+func TestHeadingColorsMergeIntoSlideCSS(t *testing.T) {
+	tmpFile, err := os.CreateTemp("", "slides-heading-colors-merge-*.md")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.Remove(tmpFile.Name())
+
+	content := `---
+title: Heading Color Merge Test
+headingColors:
+  h1: "#22d3ee"
+  h2: "#a3e635"
+---
+# Slide 1
+
+---
+headingColors:
+  h1: "linear-gradient(90deg, #f472b6, #60a5fa)"
+---
+# Slide 2
+`
+	if _, err := tmpFile.WriteString(content); err != nil {
+		t.Fatal(err)
+	}
+	tmpFile.Close()
+
+	pres, err := ParseMarkdownFile(tmpFile.Name())
+	if err != nil {
+		t.Fatalf("ParseMarkdownFile failed: %v", err)
+	}
+	if len(pres.Slides) != 2 {
+		t.Fatalf("Expected 2 slides, got %d", len(pres.Slides))
+	}
+
+	css0 := string(pres.Slides[0].HeadingColorCSS)
+	if !strings.Contains(css0, "#slide-0 h1 { color: #22d3ee; }") {
+		t.Errorf("Expected slide 0 h1 solid color rule, got %q", css0)
+	}
+	if !strings.Contains(css0, "#slide-0 h2 { color: #a3e635; }") {
+		t.Errorf("Expected slide 0 h2 solid color rule, got %q", css0)
+	}
+
+	css1 := string(pres.Slides[1].HeadingColorCSS)
+	if !strings.Contains(css1, "#slide-1 h1 { background: linear-gradient(90deg, #f472b6, #60a5fa);") {
+		t.Errorf("Expected slide 1 h1 gradient rule (local override), got %q", css1)
+	}
+	if !strings.Contains(css1, "#slide-1 h2 { color: #a3e635; }") {
+		t.Errorf("Expected slide 1 h2 to fall back to the global value, got %q", css1)
+	}
+}
