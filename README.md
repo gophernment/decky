@@ -1,6 +1,6 @@
 # Gophern 🐹
 
-**Gophern** is a professional, local Markdown presentation engine built with Go and `htmx`. It compiles standard Markdown files into sleek, interactive online slideshows featuring a synchronized presenter console, real-time Server-Sent Events (SSE) state synchronization, and a self-contained PDF exporter.
+**Gophern** is a professional, local Markdown presentation engine built with Go and `htmx`. It compiles standard Markdown files into sleek, interactive online slideshows featuring a synchronized presenter console, real-time Server-Sent Events (SSE) state synchronization, and self-contained PDF or HTML exporters.
 
 ---
 
@@ -12,6 +12,7 @@
 - **Presenter Dashboard**: Features a clock, elapsed timer, current/next slide previews, and real-time speaker notes display.
 - **SSE Real-Time Sync**: Synchronizes slide navigation in real-time between the main viewer and presenter console.
 - **Self-Contained Export**: Renders every slide via a locally installed headless Chrome and assembles them into a single, portable PDF that can be opened offline anywhere.
+- **Self-Contained HTML Export**: Bundles every slide, plus all CSS and JS, into a single static HTML file that needs no server or network access to view.
 
 ---
 
@@ -41,7 +42,7 @@ go install .
 
 ## Usage
 
-Gophern provides two main subcommands: `serve` and `export`.
+Gophern provides four subcommands: `serve`, `export`, `html`, and `usage`.
 
 ### 1. Run Live Presentation Server (`serve`)
 Start the local HTTP server to display slides and enable presenter synchronization:
@@ -71,6 +72,24 @@ gophern export [-o output.pdf] example.md
 ```
 
 Each slide is rendered through a locally installed headless Chrome/Chromium (required for `export`; `serve` does not need it) and captured as a full-resolution image, one per PDF page — so the exported file looks exactly like the live view, including gradients, backgrounds, and syntax-highlighted code, with no server or browser needed to view it afterward.
+
+### 3. Export Standalone HTML (`html`)
+Export the presentation into a single self-contained HTML file — no server required to view it:
+
+```bash
+gophern html [-o output.html] example.md
+```
+
+Everything is inlined into the one output file (CSS, JS, and every slide's syntax-highlighted code), so it never needs network access at view time and can be hosted as a static page (e.g. GitHub Pages) or opened directly from disk. Unlike `export`, this does not require a local Chrome/Chromium install.
+
+### 4. Get the Usage Guide (`usage`)
+Write a local copy of the tutorial deck (`USAGE.md`) to disk — useful if you installed with `go install` and don't have the repo cloned:
+
+```bash
+gophern usage [-o USAGE.md]
+```
+
+Then view it live with `gophern serve USAGE.md`.
 
 ---
 

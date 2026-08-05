@@ -40,11 +40,12 @@ go install github.com/gophernment/gophern@latest
 # or clone the repo and `go build .`
 ```
 
-### Three commands, that's it
+### Four commands, that's it
 ```bash
 gophern serve [-port 8080] USAGE.md        # live server + hot reload
 gophern export [-o output.pdf] USAGE.md    # single PDF, one page per slide
 gophern html [-o output.html] USAGE.md     # single self-contained HTML file
+gophern usage [-o USAGE.md]                # write this guide to a local file
 ```
 
 `serve` starts a local HTTP server with a `/presenter` console and
@@ -53,7 +54,9 @@ headless Chrome to capture each slide and assemble a PDF — the thing to
 hand out or attach to an email. `html` bundles the CSS, JS, and every
 slide into one self-contained HTML file with no server required to view
 it — the thing to host as a static page (e.g. GitHub Pages) so a live
-gophern process isn't required just to view the deck online.
+gophern process isn't required just to view the deck online. `usage`
+writes this exact tutorial deck to disk — handy if you installed with
+`go install` and don't have this repo cloned to read it from.
 
 <!--
 Mention that `html` never needs network access at view time — everything
