@@ -3,6 +3,7 @@
      structure (layout classes, regions grid, background/color/headerFont)
      is defined once in Go templates rather than duplicated in JS. */}}
 {{ define "slideBody" }}
+{{ if .HeadingColorCSS }}<style>{{ .HeadingColorCSS }}</style>{{ end }}
 <div id="slide-{{ .Index }}" class="slide {{ if .Layout }}{{ .Layout }}{{ else }}default{{ end }}"
      style="{{ if .Background }}background: {{ .Background | cssValue }};{{ end }} {{ if .Color }}color: {{ .Color | cssValue }}; --slide-text-color: {{ .Color | cssValue }};{{ end }} {{ if .HeaderFont }}--font-heading: {{ sansFontFamily .HeaderFont }};{{ end }}">
     {{ if .Regions }}

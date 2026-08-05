@@ -89,3 +89,44 @@ func TestExportHTML_ControlsHiddenByDefault(t *testing.T) {
 		t.Errorf("expected nav controls/slide number hidden by default, got: %s", html)
 	}
 }
+
+func TestExportHTML_HeadingColors(t *testing.T) {
+	dir := t.TempDir()
+	mdPath := filepath.Join(dir, "deck.md")
+
+	content := `---
+title: Heading Colors Export Test
+headingColors:
+  h1: "linear-gradient(90deg, #f472b6, #60a5fa)"
+  h3: "#a3e635"
+---
+# Slide 1
+### A level-3 heading
+`
+	if err := os.WriteFile(mdPath, []byte(content), 0o644); err != nil {
+		t.Fatalf("failed to write markdown: %v", err)
+	}
+
+	outPath := filepath.Join(dir, "out.html")
+	if err := exporter.ExportHTML(mdPath, outPath); err != nil {
+		t.Fatalf("ExportHTML failed: %v", err)
+	}
+
+	htmlBytes, err := os.ReadFile(outPath)
+	if err != nil {
+		t.Fatalf("failed to read output html: %v", err)
+	}
+	html := string(htmlBytes)
+
+	styleIdx := strings.Index(html, "#slide-0 h1 { background: linear-gradient(90deg, #f472b6, #60a5fa);")
+	if styleIdx == -1 {
+		t.Fatalf("expected scoped gradient CSS rule for slide 0 h1 in output, got: %s", html)
+	}
+	divIdx := strings.Index(html, `id="slide-0"`)
+	if divIdx == -1 || styleIdx > divIdx {
+		t.Errorf("expected the <style> block to appear before the slide div, styleIdx=%d divIdx=%d", styleIdx, divIdx)
+	}
+	if !strings.Contains(html, "#slide-0 h3 { color: #a3e635; }") {
+		t.Errorf("expected scoped solid-color CSS rule for slide 0 h3, got: %s", html)
+	}
+}

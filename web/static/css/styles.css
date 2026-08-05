@@ -94,6 +94,24 @@ body {
   font-family: var(--font-heading, var(--font-sans));
 }
 
+.slide h3 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: var(--slide-text-color, var(--text-primary));
+  font-family: var(--font-heading, var(--font-sans));
+}
+
+.slide h4 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+  color: var(--slide-text-color, var(--text-primary));
+  font-family: var(--font-heading, var(--font-sans));
+}
+
 /* Slide Transition States */
 .slide.active {
   opacity: 1;
