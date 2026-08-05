@@ -81,10 +81,19 @@ func Start(markdownFile, port string, stdout io.Writer) error {
 		presentationURL = terminalHyperlink(presentationURL)
 		presenterURL = terminalHyperlink(presenterURL)
 	}
-	fmt.Fprintf(stdout, "\n  Presentation:  %s\n  Presenter:     %s\n\n  Export to a standalone file:\n    gophern export -o output.html %s\n\n",
-		presentationURL, presenterURL, markdownFile)
+	fmt.Fprint(stdout, startupMessage(presentationURL, presenterURL, markdownFile))
 
 	return http.ListenAndServe(":"+port, s.Router())
+}
+
+// startupMessage builds the text Start prints once the server is ready:
+// the two view URLs, plus a hint for each of the two ways to export a
+// standalone copy of the deck (PDF via `export`, HTML via `html` — two
+// separate commands, two separate flags, shown as two separate lines so
+// neither is mistaken for producing the other's output format).
+func startupMessage(presentationURL, presenterURL, markdownFile string) string {
+	return fmt.Sprintf("\n  Presentation:  %s\n  Presenter:     %s\n\n  Export to PDF:   gophern export -o output.pdf %s\n  Export to HTML:  gophern html -o output.html %s\n\n",
+		presentationURL, presenterURL, markdownFile, markdownFile)
 }
 
 // isTerminalWriter reports whether w is an *os.File connected to a terminal
