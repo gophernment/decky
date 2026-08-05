@@ -1384,3 +1384,87 @@ headerFont: 'Poppins'
 		}
 	})
 }
+
+func TestHeadingColorsParsing(t *testing.T) {
+	t.Run("global headingColors is parsed onto the presentation", func(t *testing.T) {
+		tmpFile, err := os.CreateTemp("", "slides-heading-colors-global-*.md")
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer os.Remove(tmpFile.Name())
+
+		content := `---
+title: Heading Color Test
+headingColors:
+  h1: "#22d3ee"
+  h2: "linear-gradient(90deg, #f472b6, #60a5fa)"
+---
+# Slide 1
+
+---
+# Slide 2
+`
+		if _, err := tmpFile.WriteString(content); err != nil {
+			t.Fatal(err)
+		}
+		tmpFile.Close()
+
+		pres, err := ParseMarkdownFile(tmpFile.Name())
+		if err != nil {
+			t.Fatalf("ParseMarkdownFile failed: %v", err)
+		}
+		if pres.HeadingColors["h1"] != "#22d3ee" {
+			t.Errorf("Expected pres.HeadingColors[h1] = #22d3ee, got %q", pres.HeadingColors["h1"])
+		}
+		if pres.HeadingColors["h2"] != "linear-gradient(90deg, #f472b6, #60a5fa)" {
+			t.Errorf("Expected pres.HeadingColors[h2] to be the gradient, got %q", pres.HeadingColors["h2"])
+		}
+		if len(pres.Slides) != 2 {
+			t.Fatalf("Expected 2 slides, got %d", len(pres.Slides))
+		}
+	})
+
+	t.Run("local headingColors is parsed onto only that slide", func(t *testing.T) {
+		tmpFile, err := os.CreateTemp("", "slides-heading-colors-local-*.md")
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer os.Remove(tmpFile.Name())
+
+		content := `---
+title: Heading Color Test
+headingColors:
+  h1: "#22d3ee"
+  h2: "#a3e635"
+---
+# Slide 1
+
+---
+headingColors:
+  h1: "#facc15"
+---
+# Slide 2
+`
+		if _, err := tmpFile.WriteString(content); err != nil {
+			t.Fatal(err)
+		}
+		tmpFile.Close()
+
+		pres, err := ParseMarkdownFile(tmpFile.Name())
+		if err != nil {
+			t.Fatalf("ParseMarkdownFile failed: %v", err)
+		}
+		if len(pres.Slides) != 2 {
+			t.Fatalf("Expected 2 slides, got %d", len(pres.Slides))
+		}
+		if len(pres.Slides[0].HeadingColors) != 0 {
+			t.Errorf("Expected slide 0 to have no local headingColors, got %+v", pres.Slides[0].HeadingColors)
+		}
+		if pres.Slides[1].HeadingColors["h1"] != "#facc15" {
+			t.Errorf("Expected slide 1 local HeadingColors[h1] = #facc15, got %q", pres.Slides[1].HeadingColors["h1"])
+		}
+		if _, ok := pres.Slides[1].HeadingColors["h2"]; ok {
+			t.Errorf("Expected slide 1 local HeadingColors to not set h2, got %q", pres.Slides[1].HeadingColors["h2"])
+		}
+	})
+}

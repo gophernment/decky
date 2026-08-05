@@ -58,6 +58,13 @@ type Presentation struct {
 	Theme       string      `yaml:"theme"`
 	AspectRatio string      `yaml:"aspectRatio"`
 	Fonts       FontsConfig `yaml:"fonts"`
+
+	// HeadingColors sets deck-wide default colors/gradients per heading
+	// level (h1-h4). A slide's own headingColors overrides individual
+	// levels; levels it doesn't set fall back to this deck-wide default.
+	// See Slide.HeadingColors and mergeHeadingColors (Task 2).
+	HeadingColors map[string]string `yaml:"headingColors"`
+
 	Slides      []Slide
 
 	// ShowControls and ShowSlideNumber toggle the prev/next nav buttons and
@@ -107,6 +114,10 @@ type Slide struct {
 	RowsCSS string
 
 	HeaderFont string `yaml:"headerFont"`
+
+	// HeadingColors overrides the deck-wide default (Presentation.HeadingColors)
+	// per heading level, for this slide only. See mergeHeadingColors (Task 2).
+	HeadingColors map[string]string `yaml:"headingColors"`
 
 	// Fragments, when true, numbers every <li> rendered from this slide's
 	// markdown (in document order) and marks it with class="fragment" so
@@ -161,6 +172,9 @@ func ParseMarkdownFile(path string) (*Presentation, error) {
 					}
 					if globalConfig.Fonts.Mono != "" {
 						pres.Fonts.Mono = globalConfig.Fonts.Mono
+					}
+					if len(globalConfig.HeadingColors) > 0 {
+						pres.HeadingColors = globalConfig.HeadingColors
 					}
 					pres.ShowControls = globalConfig.ShowControls
 					pres.ShowSlideNumber = globalConfig.ShowSlideNumber
@@ -451,6 +465,7 @@ var coreFrontmatterKeys = map[string]bool{
 	"rows":            true,
 	"fonts":           true,
 	"headerFont":      true,
+	"headingColors":   true,
 	"fragments":       true,
 	"showControls":    true,
 	"showSlideNumber": true,
