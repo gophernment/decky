@@ -126,7 +126,7 @@ headingColors:
 	if divIdx == -1 || styleIdx > divIdx {
 		t.Errorf("expected the <style> block to appear before the slide div, styleIdx=%d divIdx=%d", styleIdx, divIdx)
 	}
-	if !strings.Contains(html, "#slide-0 h3 { color: #a3e635; }") {
+	if !strings.Contains(html, "#slide-0 h3 { color: #a3e635; -webkit-text-fill-color: #a3e635; }") {
 		t.Errorf("expected scoped solid-color CSS rule for slide 0 h3, got: %s", html)
 	}
 }

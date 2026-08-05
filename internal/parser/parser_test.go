@@ -1495,7 +1495,19 @@ func TestBuildHeadingColorCSS(t *testing.T) {
 
 	t.Run("solid color emits a color rule scoped to the slide id", func(t *testing.T) {
 		css := string(buildHeadingColorCSS(3, map[string]string{"h2": "#22d3ee"}))
-		want := "#slide-3 h2 { color: #22d3ee; }"
+		want := "#slide-3 h2 { color: #22d3ee; -webkit-text-fill-color: #22d3ee; }"
+		if !strings.Contains(css, want) {
+			t.Errorf("Expected CSS to contain %q, got %q", want, css)
+		}
+	})
+
+	t.Run("solid color also sets -webkit-text-fill-color to override cover-layout gradient text", func(t *testing.T) {
+		// .slide.cover h1 sets -webkit-text-fill-color: transparent as part of
+		// its own gradient-text effect, which wins over a plain `color`
+		// declaration in WebKit/Blink. A solid headingColors value must set
+		// -webkit-text-fill-color explicitly or it gets silently overridden.
+		css := string(buildHeadingColorCSS(0, map[string]string{"h1": "#facc15"}))
+		want := "-webkit-text-fill-color: #facc15;"
 		if !strings.Contains(css, want) {
 			t.Errorf("Expected CSS to contain %q, got %q", want, css)
 		}
@@ -1569,10 +1581,10 @@ headingColors:
 	}
 
 	css0 := string(pres.Slides[0].HeadingColorCSS)
-	if !strings.Contains(css0, "#slide-0 h1 { color: #22d3ee; }") {
+	if !strings.Contains(css0, "#slide-0 h1 { color: #22d3ee; -webkit-text-fill-color: #22d3ee; }") {
 		t.Errorf("Expected slide 0 h1 solid color rule, got %q", css0)
 	}
-	if !strings.Contains(css0, "#slide-0 h2 { color: #a3e635; }") {
+	if !strings.Contains(css0, "#slide-0 h2 { color: #a3e635; -webkit-text-fill-color: #a3e635; }") {
 		t.Errorf("Expected slide 0 h2 solid color rule, got %q", css0)
 	}
 
@@ -1580,7 +1592,7 @@ headingColors:
 	if !strings.Contains(css1, "#slide-1 h1 { background: linear-gradient(90deg, #f472b6, #60a5fa);") {
 		t.Errorf("Expected slide 1 h1 gradient rule (local override), got %q", css1)
 	}
-	if !strings.Contains(css1, "#slide-1 h2 { color: #a3e635; }") {
+	if !strings.Contains(css1, "#slide-1 h2 { color: #a3e635; -webkit-text-fill-color: #a3e635; }") {
 		t.Errorf("Expected slide 1 h2 to fall back to the global value, got %q", css1)
 	}
 }

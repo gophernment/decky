@@ -377,7 +377,11 @@ func isGradientValue(value string) bool {
 // buildHeadingColorCSS generates a scoped CSS rule set for a slide's merged
 // headingColors, one rule per level, scoped to that slide's DOM id
 // (#slide-N, matching web/templates/_slide.html's `id="slide-{{ .Index }}"`).
-// Solid colors set `color`; gradients use the background-clip:text
+// Solid colors set both `color` and `-webkit-text-fill-color`: layouts like
+// `.slide.cover h1` apply their own gradient-text effect via
+// `-webkit-text-fill-color: transparent`, which wins over a plain `color`
+// declaration in WebKit/Blink browsers, so the fill color must be set
+// explicitly to override it. Gradients use the background-clip:text
 // technique so the gradient paints the glyph shapes instead of a solid
 // background box. Returns "" if merged is empty.
 func buildHeadingColorCSS(slideIndex int, merged map[string]string) template.CSS {
@@ -394,7 +398,7 @@ func buildHeadingColorCSS(slideIndex int, merged map[string]string) template.CSS
 		if isGradientValue(value) {
 			fmt.Fprintf(&b, "background: %s; -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent;", value)
 		} else {
-			fmt.Fprintf(&b, "color: %s;", value)
+			fmt.Fprintf(&b, "color: %s; -webkit-text-fill-color: %s;", value, value)
 		}
 		b.WriteString(" }\n")
 	}
