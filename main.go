@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "embed"
 	"errors"
 	"flag"
 	"fmt"
@@ -10,6 +11,9 @@ import (
 	"github.com/gophernment/gophern/internal/exporter"
 	"github.com/gophernment/gophern/internal/server"
 )
+
+//go:embed USAGE.md
+var usageGuide string
 
 var startServer = func(markdownFile, port string, stdout io.Writer) error {
 	return server.Start(markdownFile, port, stdout)
@@ -111,6 +115,24 @@ func run(args []string, stdout, stderr io.Writer) error {
 		}
 		return nil
 
+	case "usage":
+		usageCmd := flag.NewFlagSet("usage", flag.ContinueOnError)
+		usageCmd.SetOutput(stderr)
+		output := usageCmd.String("o", "USAGE.md", "Output file path")
+		usageCmd.Usage = func() {
+			fmt.Fprintln(usageCmd.Output(), "Usage: gophern usage [-o USAGE.md]")
+			fmt.Fprintln(usageCmd.Output(), "Options:")
+			usageCmd.PrintDefaults()
+		}
+		if err := usageCmd.Parse(args[2:]); err != nil {
+			return err
+		}
+		if err := os.WriteFile(*output, []byte(usageGuide), 0o644); err != nil {
+			return err
+		}
+		fmt.Fprintf(stdout, "Wrote %s — run \"gophern serve %s\" to try it.\n", *output, *output)
+		return nil
+
 	default:
 		printUsage(stderr)
 		return fmt.Errorf("unknown command: %s", command)
@@ -123,4 +145,5 @@ func printUsage(w io.Writer) {
 	fmt.Fprintln(w, "  serve [-port 8080] <file.md>  Start the presentation server")
 	fmt.Fprintln(w, "  export [-o output.pdf] <file.md>  Export to a single PDF file")
 	fmt.Fprintln(w, "  html [-o output.html] <file.md>  Export to a single self-contained HTML file")
+	fmt.Fprintln(w, "  usage [-o USAGE.md]  Write the embedded usage guide to a file")
 }

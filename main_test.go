@@ -3,6 +3,8 @@ package main
 import (
 	"bytes"
 	"io"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -146,5 +148,49 @@ func TestCLIHTMLCustomOutput(t *testing.T) {
 	}
 	if !strings.Contains(output, "Exporting test.md to out.html...") {
 		t.Errorf("expected export message with custom output path, got: %s", output)
+	}
+}
+
+func TestCLIUsageCommand(t *testing.T) {
+	dir := t.TempDir()
+	outPath := filepath.Join(dir, "USAGE.md")
+
+	output, err := runCLI("usage", "-o", outPath)
+	if err != nil {
+		t.Fatalf("expected no error, got: %v (output: %s)", err, output)
+	}
+	if !strings.Contains(output, "Wrote "+outPath) {
+		t.Errorf("expected confirmation message, got: %s", output)
+	}
+
+	written, err := os.ReadFile(outPath)
+	if err != nil {
+		t.Fatalf("expected file to be written: %v", err)
+	}
+	if !strings.Contains(string(written), "# Gophern Usage Guide") {
+		t.Errorf("expected written file to contain the usage guide's title, got %d bytes starting with: %.80s", len(written), written)
+	}
+}
+
+func TestCLIUsageCommandDefaultOutput(t *testing.T) {
+	dir := t.TempDir()
+	oldwd, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Chdir(dir); err != nil {
+		t.Fatal(err)
+	}
+	defer os.Chdir(oldwd)
+
+	output, err := runCLI("usage")
+	if err != nil {
+		t.Fatalf("expected no error, got: %v (output: %s)", err, output)
+	}
+	if !strings.Contains(output, "Wrote USAGE.md") {
+		t.Errorf("expected default-output confirmation message, got: %s", output)
+	}
+	if _, err := os.Stat(filepath.Join(dir, "USAGE.md")); err != nil {
+		t.Errorf("expected USAGE.md to be written to cwd: %v", err)
 	}
 }
