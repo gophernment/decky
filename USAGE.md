@@ -581,6 +581,43 @@ document order) — it's a per-slide opt-in, not a deck-wide default.
 -->
 
 ---
+headingColors:
+  h1: "linear-gradient(90deg, #f472b6, #60a5fa)"
+  h2: "#22d3ee"
+  h3: "#a3e635"
+  h4: "#fbbf24"
+background: "#1e293b"
+color: "#f8fafc"
+---
+
+# 21. Heading Colors & Gradients
+## A solid cyan H2
+### A solid green H3
+#### A solid amber H4
+
+Give each heading level (`h1`-`h4`) its own color or gradient with
+`headingColors` frontmatter — set deck-wide defaults on Slide 0, override
+per level on any later slide (levels you don't list there keep the deck
+default).
+
+```markdown
+---
+headingColors:
+  h1: "linear-gradient(90deg, #f472b6, #60a5fa)"
+  h2: "#22d3ee"
+---
+```
+
+<!--
+Any value containing "gradient(" (linear-gradient, radial-gradient,
+conic-gradient, case-insensitive) renders via the background-clip:text
+technique; anything else is treated as a solid CSS color. Merge is
+per-level: a level set in a slide's own headingColors overrides just that
+level, every other level still falls back to whatever was set globally on
+Slide 0.
+-->
+
+---
 layout: "cover"
 background: "linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%)"
 color: "#ffffff"
