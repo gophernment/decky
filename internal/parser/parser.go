@@ -105,7 +105,8 @@ type Slide struct {
 	Layout       string `yaml:"layout"`
 	Background   string `yaml:"background"`
 	Color        string `yaml:"color"`
-	SpeakerNotes string
+	SpeakerNotes     string
+	SpeakerNotesHTML string
 
 	Ratio string `yaml:"ratio"`
 	Cols  string `yaml:"cols"`
@@ -249,6 +250,12 @@ func ParseMarkdownFile(path string) (*Presentation, error) {
 			slide.SpeakerNotes = notes
 			i++
 		}
+
+		notesHTML, err := RenderMarkdownToHTML(slide.SpeakerNotes)
+		if err != nil {
+			return nil, err
+		}
+		slide.SpeakerNotesHTML = notesHTML
 
 		header, regions := splitRegions(slide.RawMarkdown)
 

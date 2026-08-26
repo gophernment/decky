@@ -198,6 +198,12 @@
 
         .notes-content-wrapper {
             flex-grow: 1;
+            /* Flex items default to min-height: auto, which lets this box
+               grow past its allotted space instead of shrinking to fit —
+               the ancestor's overflow: hidden then silently clips whatever
+               doesn't fit, and this box's own overflow-y: auto never gets a
+               chance to kick in (no scrollbar, content just vanishes). */
+            min-height: 0;
             background: #ffffff;
             border: 1px solid var(--border-card);
             border-radius: 12px;
@@ -206,7 +212,31 @@
             font-size: 1.1rem;
             line-height: 1.6;
             color: #000000;
-            white-space: pre-wrap;
+        }
+
+        /* Notes render through the same markdown pipeline as slide bodies
+           (goldmark), so p/ul/strong/code/etc. arrive as real elements, not
+           plain text. styles.css's global rules for those tags default to
+           --text-primary/--text-secondary (near-white, for dark slide
+           backgrounds) — illegible on this box's white background, so every
+           element gets a legible dark color here explicitly. */
+        .notes-content-wrapper p,
+        .notes-content-wrapper li,
+        .notes-content-wrapper strong {
+            color: #0f172a;
+        }
+
+        .notes-content-wrapper > *:last-child {
+            margin-bottom: 0;
+        }
+
+        .notes-content-wrapper code {
+            background: rgba(15, 23, 42, 0.08);
+            color: #0f172a;
+        }
+
+        .notes-content-wrapper a {
+            color: var(--accent-primary);
         }
 
         .notes-content-wrapper .no-notes {
@@ -384,10 +414,11 @@
                     `;
                 }
 
-                // 3. Update speaker notes
+                // 3. Update speaker notes (server-rendered markdown, same
+                // pipeline as slide bodies — see SpeakerNotesHTML in parser.go)
                 const notesContainer = document.getElementById('speaker-notes');
-                if (currentSlide.SpeakerNotes) {
-                    notesContainer.textContent = currentSlide.SpeakerNotes;
+                if (currentSlide.SpeakerNotesHTML) {
+                    notesContainer.innerHTML = currentSlide.SpeakerNotesHTML;
                 } else {
                     notesContainer.innerHTML = '<span class="no-notes">No speaker notes for this slide.</span>';
                 }
