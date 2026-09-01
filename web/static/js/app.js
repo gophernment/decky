@@ -198,13 +198,13 @@ document.addEventListener('DOMContentLoaded', () => {
   // viewers — the SSE slide index is what stays synced across viewers).
   function saveScrollState() {
     const activeSlide = slides[currentIndex];
-    sessionStorage.setItem('gophern:scrollIndex', String(currentIndex));
-    sessionStorage.setItem('gophern:scrollTop', String(activeSlide ? activeSlide.scrollTop : 0));
+    sessionStorage.setItem('decky:scrollIndex', String(currentIndex));
+    sessionStorage.setItem('decky:scrollTop', String(activeSlide ? activeSlide.scrollTop : 0));
   }
 
   function restoreScrollState(index) {
-    const savedIndex = sessionStorage.getItem('gophern:scrollIndex');
-    const savedScroll = sessionStorage.getItem('gophern:scrollTop');
+    const savedIndex = sessionStorage.getItem('decky:scrollIndex');
+    const savedScroll = sessionStorage.getItem('decky:scrollTop');
     if (savedIndex === null || savedScroll === null) return;
     if (parseInt(savedIndex, 10) !== index) return;
     const activeSlide = slides[index];

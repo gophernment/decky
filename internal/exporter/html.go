@@ -4,14 +4,14 @@ import (
 	"html/template"
 	"os"
 
-	"github.com/gophernment/gophern/internal/parser"
-	"github.com/gophernment/gophern/web"
+	"github.com/gophernment/decky/internal/parser"
+	"github.com/gophernment/decky/web"
 )
 
 // ExportHTML compiles the markdown presentation file into a single
 // self-contained HTML file — CSS and JS are inlined, so the output has no
 // external dependency and can be opened directly (file://) or hosted
-// anywhere as a static file, unlike `gophern serve`'s /asset/ convention
+// anywhere as a static file, unlike `decky serve`'s /asset/ convention
 // which needs a running server. Any asset/ images the deck references keep
 // their original (relative) paths, so they must ship alongside this file.
 //

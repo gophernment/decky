@@ -1,6 +1,6 @@
-# Gophern 🐹
+# Decky 🐹
 
-**Gophern** is a professional, local Markdown presentation engine built with Go and `htmx`. It compiles standard Markdown files into sleek, interactive online slideshows featuring a synchronized presenter console, real-time Server-Sent Events (SSE) state synchronization, and self-contained PDF or HTML exporters.
+**Decky** is a professional, local Markdown presentation engine built with Go and `htmx`. It compiles standard Markdown files into sleek, interactive online slideshows featuring a synchronized presenter console, real-time Server-Sent Events (SSE) state synchronization, and self-contained PDF or HTML exporters.
 
 ---
 
@@ -21,10 +21,10 @@
 Ensure you have [Go](https://go.dev/) (version 1.22 or higher) installed. 
 
 ### Install Remotely
-You can install Gophern directly using Go's package manager:
+You can install Decky directly using Go's package manager:
 
 ```bash
-go install github.com/gophernment/gophern@latest
+go install github.com/gophernment/decky@latest
 ```
 
 Ensure your Go bin directory (`$GOPATH/bin` or `~/go/bin`) is added to your system's `PATH`.
@@ -33,8 +33,8 @@ Ensure your Go bin directory (`$GOPATH/bin` or `~/go/bin`) is added to your syst
 Alternatively, clone the repository and install it locally:
 
 ```bash
-git clone https://github.com/gophernment/gophern.git
-cd gophern
+git clone https://github.com/gophernment/decky.git
+cd decky
 go install .
 ```
 
@@ -42,23 +42,23 @@ go install .
 
 ## Usage
 
-Gophern provides four subcommands: `serve`, `export`, `html`, and `usage`.
+Decky provides four subcommands: `serve`, `export`, `html`, and `usage`.
 
 ### 1. Run Live Presentation Server (`serve`)
 Start the local HTTP server to display slides and enable presenter synchronization:
 
 ```bash
-gophern serve [-port 8080] example.md
+decky serve [-port 3325] example.md
 ```
 
 The port also defaults to the `PORT` environment variable when `-port` isn't given (`-port` always wins if both are set):
 
 ```bash
-PORT=3000 gophern serve example.md
+PORT=3000 decky serve example.md
 ```
 
-- Open the **Presentation View** at `http://localhost:8080/`.
-- Open the **Presenter Console** at `http://localhost:8080/presenter`.
+- Open the **Presentation View** at `http://localhost:3325/`.
+- Open the **Presenter Console** at `http://localhost:3325/presenter`.
 
 Navigating slides on either window (using arrow keys, space, or buttons) will automatically sync the other window instantly via Server-Sent Events.
 
@@ -68,7 +68,7 @@ A fullscreen toggle button always sits in the bottom-right corner of the **Prese
 Export the presentation into a single self-contained PDF for distribution or offline use:
 
 ```bash
-gophern export [-o output.pdf] example.md
+decky export [-o output.pdf] example.md
 ```
 
 Each slide is rendered through a locally installed headless Chrome/Chromium (required for `export`; `serve` does not need it) and captured as a full-resolution image, one per PDF page — so the exported file looks exactly like the live view, including gradients, backgrounds, and syntax-highlighted code, with no server or browser needed to view it afterward.
@@ -77,7 +77,7 @@ Each slide is rendered through a locally installed headless Chrome/Chromium (req
 Export the presentation into a single self-contained HTML file — no server required to view it:
 
 ```bash
-gophern html [-o output.html] example.md
+decky html [-o output.html] example.md
 ```
 
 Everything is inlined into the one output file (CSS, JS, and every slide's syntax-highlighted code), so it never needs network access at view time and can be hosted as a static page (e.g. GitHub Pages) or opened directly from disk. Unlike `export`, this does not require a local Chrome/Chromium install.
@@ -86,10 +86,10 @@ Everything is inlined into the one output file (CSS, JS, and every slide's synta
 Write a local copy of the tutorial deck (`USAGE.md`) to disk — useful if you installed with `go install` and don't have the repo cloned:
 
 ```bash
-gophern usage [-o USAGE.md]
+decky usage [-o USAGE.md]
 ```
 
-Then view it live with `gophern serve USAGE.md`.
+Then view it live with `decky serve USAGE.md`.
 
 ---
 

@@ -78,7 +78,7 @@ Promise.all(Array.from(document.images).map(function(img) {
 // order. pageURL must be a fully-qualified URL the caller is responsible for
 // constructing (e.g. an http://127.0.0.1:port/... URL served from the
 // deck's own directory, so both relative asset/foo.png and root-absolute
-// /asset/foo.png references resolve exactly as they do under `gophern
+// /asset/foo.png references resolve exactly as they do under `decky
 // serve` — a bare file:// URL cannot resolve root-absolute paths, since
 // those resolve against the filesystem root instead of the deck's
 // directory). The CSS layout is sized at the deck's native cssWidthPx x

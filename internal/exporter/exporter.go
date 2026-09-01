@@ -10,8 +10,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/gophernment/gophern/internal/parser"
-	"github.com/gophernment/gophern/web"
+	"github.com/gophernment/decky/internal/parser"
+	"github.com/gophernment/decky/web"
 )
 
 // ChromeAvailableForTest exposes chromeAvailable to external test packages.
@@ -47,8 +47,8 @@ func Export(markdownPath, outputPath string) error {
 	// Serve the deck's own directory (which now also contains tmpHTMLPath)
 	// over HTTP instead of navigating to it via file://, so root-absolute
 	// asset references (<img src="/asset/foo.png">, the same convention
-	// `gophern serve` uses) resolve to the deck's asset/ folder exactly as
-	// they do under `gophern serve`, rather than to the filesystem root.
+	// `decky serve` uses) resolve to the deck's asset/ folder exactly as
+	// they do under `decky serve`, rather than to the filesystem root.
 	deckDir := filepath.Dir(markdownPath)
 	assetServer := httptest.NewServer(http.FileServer(http.Dir(deckDir)))
 	defer assetServer.Close()
@@ -122,7 +122,7 @@ func renderTempHTML(markdownPath string, pres *parser.Presentation) (string, err
 	}
 
 	dir := filepath.Dir(markdownPath)
-	tmpFile, err := os.CreateTemp(dir, ".gophern-export-*.html")
+	tmpFile, err := os.CreateTemp(dir, ".decky-export-*.html")
 	if err != nil {
 		return "", err
 	}

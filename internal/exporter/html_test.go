@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gophernment/gophern/internal/exporter"
+	"github.com/gophernment/decky/internal/exporter"
 )
 
 func TestExportHTML_ProducesSelfContainedFile(t *testing.T) {

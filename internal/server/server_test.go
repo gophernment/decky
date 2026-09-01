@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gophernment/gophern/internal/server"
+	"github.com/gophernment/decky/internal/server"
 )
 
 func TestServerRouter(t *testing.T) {

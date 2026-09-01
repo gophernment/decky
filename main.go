@@ -8,8 +8,8 @@ import (
 	"io"
 	"os"
 
-	"github.com/gophernment/gophern/internal/exporter"
-	"github.com/gophernment/gophern/internal/server"
+	"github.com/gophernment/decky/internal/exporter"
+	"github.com/gophernment/decky/internal/server"
 )
 
 //go:embed USAGE.md
@@ -45,13 +45,13 @@ func run(args []string, stdout, stderr io.Writer) error {
 	case "serve":
 		serveCmd := flag.NewFlagSet("serve", flag.ContinueOnError)
 		serveCmd.SetOutput(stderr)
-		defaultPort := "8080"
+		defaultPort := "3325"
 		if envPort := os.Getenv("PORT"); envPort != "" {
 			defaultPort = envPort
 		}
-		port := serveCmd.String("port", defaultPort, "Port to serve presentation on (defaults to $PORT env var, or 8080)")
+		port := serveCmd.String("port", defaultPort, "Port to serve presentation on (defaults to $PORT env var, or 3325)")
 		serveCmd.Usage = func() {
-			fmt.Fprintln(serveCmd.Output(), "Usage: gophern serve [-port 8080] <file.md>")
+			fmt.Fprintln(serveCmd.Output(), "Usage: decky serve [-port 3325] <file.md>")
 			fmt.Fprintln(serveCmd.Output(), "Options:")
 			serveCmd.PrintDefaults()
 		}
@@ -74,7 +74,7 @@ func run(args []string, stdout, stderr io.Writer) error {
 		exportCmd.SetOutput(stderr)
 		output := exportCmd.String("o", "presentation.pdf", "Output PDF file path")
 		exportCmd.Usage = func() {
-			fmt.Fprintln(exportCmd.Output(), "Usage: gophern export [-o output.pdf] <file.md>")
+			fmt.Fprintln(exportCmd.Output(), "Usage: decky export [-o output.pdf] <file.md>")
 			fmt.Fprintln(exportCmd.Output(), "Options:")
 			exportCmd.PrintDefaults()
 		}
@@ -97,7 +97,7 @@ func run(args []string, stdout, stderr io.Writer) error {
 		htmlCmd.SetOutput(stderr)
 		output := htmlCmd.String("o", "presentation.html", "Output HTML file path")
 		htmlCmd.Usage = func() {
-			fmt.Fprintln(htmlCmd.Output(), "Usage: gophern html [-o output.html] <file.md>")
+			fmt.Fprintln(htmlCmd.Output(), "Usage: decky html [-o output.html] <file.md>")
 			fmt.Fprintln(htmlCmd.Output(), "Options:")
 			htmlCmd.PrintDefaults()
 		}
@@ -120,7 +120,7 @@ func run(args []string, stdout, stderr io.Writer) error {
 		usageCmd.SetOutput(stderr)
 		output := usageCmd.String("o", "USAGE.md", "Output file path")
 		usageCmd.Usage = func() {
-			fmt.Fprintln(usageCmd.Output(), "Usage: gophern usage [-o USAGE.md]")
+			fmt.Fprintln(usageCmd.Output(), "Usage: decky usage [-o USAGE.md]")
 			fmt.Fprintln(usageCmd.Output(), "Options:")
 			usageCmd.PrintDefaults()
 		}
@@ -130,7 +130,7 @@ func run(args []string, stdout, stderr io.Writer) error {
 		if err := os.WriteFile(*output, []byte(usageGuide), 0o644); err != nil {
 			return err
 		}
-		fmt.Fprintf(stdout, "Wrote %s — run \"gophern serve %s\" to try it.\n", *output, *output)
+		fmt.Fprintf(stdout, "Wrote %s — run \"decky serve %s\" to try it.\n", *output, *output)
 		return nil
 
 	default:
@@ -140,9 +140,9 @@ func run(args []string, stdout, stderr io.Writer) error {
 }
 
 func printUsage(w io.Writer) {
-	fmt.Fprintln(w, "Usage: gophern <command> [arguments]")
+	fmt.Fprintln(w, "Usage: decky <command> [arguments]")
 	fmt.Fprintln(w, "Commands:")
-	fmt.Fprintln(w, "  serve [-port 8080] <file.md>  Start the presentation server")
+	fmt.Fprintln(w, "  serve [-port 3325] <file.md>  Start the presentation server")
 	fmt.Fprintln(w, "  export [-o output.pdf] <file.md>  Export to a single PDF file")
 	fmt.Fprintln(w, "  html [-o output.html] <file.md>  Export to a single self-contained HTML file")
 	fmt.Fprintln(w, "  usage [-o USAGE.md]  Write the embedded usage guide to a file")

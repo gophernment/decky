@@ -22,7 +22,7 @@ func init() {
 }
 
 func runCLI(args ...string) (string, error) {
-	fullArgs := append([]string{"gophern"}, args...)
+	fullArgs := append([]string{"decky"}, args...)
 	var stdout, stderr bytes.Buffer
 	err := run(fullArgs, &stdout, &stderr)
 	output := stdout.String() + stderr.String()
@@ -34,7 +34,7 @@ func TestCLIUsage(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected error exit code when running with no arguments, got nil")
 	}
-	if !strings.Contains(output, "Usage: gophern <command>") {
+	if !strings.Contains(output, "Usage: decky <command>") {
 		t.Errorf("expected usage output, got: %s", output)
 	}
 }
@@ -54,7 +54,7 @@ func TestCLIServeSuccess(t *testing.T) {
 	if err != nil {
 		t.Fatalf("expected no error, got: %v (output: %s)", err, output)
 	}
-	if !strings.Contains(output, "Serving test.md on port 8080...") {
+	if !strings.Contains(output, "Serving test.md on port 3325...") {
 		t.Errorf("expected serving message, got: %s", output)
 	}
 }
@@ -167,7 +167,7 @@ func TestCLIUsageCommand(t *testing.T) {
 	if err != nil {
 		t.Fatalf("expected file to be written: %v", err)
 	}
-	if !strings.Contains(string(written), "# Gophern Usage Guide") {
+	if !strings.Contains(string(written), "# Decky Usage Guide") {
 		t.Errorf("expected written file to contain the usage guide's title, got %d bytes starting with: %.80s", len(written), written)
 	}
 }

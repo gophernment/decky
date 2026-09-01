@@ -1,5 +1,5 @@
 ---
-title: "Gophern: Go & htmx Presentation Engine"
+title: "Decky: Go & htmx Presentation Engine"
 author: "Gophernment"
 theme: "slate"
 aspectRatio: "16:9"
@@ -8,14 +8,14 @@ background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)"
 color: "#ffffff"
 ---
 
-# Gophern 🐹
+# Decky 🐹
 ### Go & htmx Markdown Presentation Engine
 
 Press **Right Arrow**, **Space**, or **Page Down** to navigate.
 
 <!-- 
-Welcome to Gophern! 
-This presentation serves as both a live demonstration of Gophern's features and its official documentation.
+Welcome to Decky! 
+This presentation serves as both a live demonstration of Decky's features and its official documentation.
 -->
 
 ---
@@ -26,7 +26,7 @@ color: "#f8fafc"
 
 # Core Philosophy
 
-Gophern is built to be a simple, lightweight, and modern presentation tool.
+Decky is built to be a simple, lightweight, and modern presentation tool.
 
 - **Developer First**: Write your slides in simple Markdown.
 - **Aspect Ratio Lock**: Strictly maintains a professional 16:9 ratio.
@@ -34,7 +34,7 @@ Gophern is built to be a simple, lightweight, and modern presentation tool.
 - **Real-Time Sync**: Synchronizes main view and presenter console using Server-Sent Events (SSE).
 
 <!-- 
-Explain why Gophern is a great alternative to heavy JS frameworks like Slidev or Marp when you want lightweight Go-based servers.
+Explain why Decky is a great alternative to heavy JS frameworks like Slidev or Marp when you want lightweight Go-based servers.
 -->
 
 ---
@@ -58,7 +58,7 @@ package main
 import "fmt"
 
 func main() {
-    fmt.Println("Hello, Gophern!")
+    fmt.Println("Hello, Decky!")
 }
 ```
 
@@ -74,7 +74,7 @@ color: "#f8fafc"
 
 # Presenter Dashboard
 
-Run `gophern serve` and navigate to `/presenter` to open the presenter console.
+Run `decky serve` and navigate to `/presenter` to open the presenter console.
 
 - **Split Screen Previews**: Displays scaled-down previews of the current and next slides.
 - **Clock & Timer**: Tracks your elapsed presentation time.
@@ -97,12 +97,12 @@ Manage your slide decks directly from the command line.
 
 ### Start the Live Server
 ```bash
-gophern serve [-port 8080] example.md
+decky serve [-port 3325] example.md
 ```
 
 ### Export for Offline Sharing
 ```bash
-gophern export [-o output.html] example.md
+decky export [-o output.html] example.md
 ```
 
 <!-- 
@@ -127,7 +127,7 @@ independently-authored regions. Set `ratio: "60/40"` to control the split.
 // Right region can hold its own
 // code block, list, or any markdown.
 func main() {
-    fmt.Println("gophern")
+    fmt.Println("decky")
 }
 ```
 
@@ -197,10 +197,10 @@ background: "linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%)"
 color: "#ffffff"
 ---
 
-# Start Presenting with Gophern!
+# Start Presenting with Decky!
 ### Simple, elegant, and blazing fast.
 
-Project Home: [github.com/gophernment/gophern](https://github.com/gophernment/gophern)
+Project Home: [github.com/gophernment/decky](https://github.com/gophernment/decky)
 
 <!-- 
 End of the presentation deck. Prompt the user for questions or contributions.

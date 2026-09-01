@@ -4,7 +4,7 @@ import (
 	"html/template"
 	"testing"
 
-	"github.com/gophernment/gophern/web"
+	"github.com/gophernment/decky/web"
 )
 
 func TestAssetsExist(t *testing.T) {
