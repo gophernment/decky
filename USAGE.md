@@ -1,5 +1,5 @@
 ---
-title: "Gophern Usage Guide"
+title: "Decky Usage Guide"
 author: "Gophernment"
 theme: "slate"
 aspectRatio: "16:9"
@@ -12,10 +12,10 @@ background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)"
 color: "#ffffff"
 ---
 
-# Gophern Usage Guide 🐹
+# Decky Usage Guide 🐹
 ### A complete, runnable tour of every feature
 
-This deck is a real `.md` file — run it with `gophern serve USAGE.md`
+This deck is a real `.md` file — run it with `decky serve USAGE.md`
 and navigate with **→**, **Space**, or **Page Down**. A fullscreen
 button sits in the bottom-right corner; the prev/next buttons and slide
 number are off by default (turned on for this deck — see slide 19).
@@ -36,16 +36,16 @@ color: "#f8fafc"
 
 ### Install
 ```bash
-go install github.com/gophernment/gophern@latest
+go install github.com/gophernment/decky@latest
 # or clone the repo and `go build .`
 ```
 
 ### Four commands, that's it
 ```bash
-gophern serve [-port 8080] USAGE.md        # live server + hot reload
-gophern export [-o output.pdf] USAGE.md    # single PDF, one page per slide
-gophern html [-o output.html] USAGE.md     # single self-contained HTML file
-gophern usage [-o USAGE.md]                # write this guide to a local file
+decky serve [-port 3325] USAGE.md        # live server + hot reload
+decky export [-o output.pdf] USAGE.md    # single PDF, one page per slide
+decky html [-o output.html] USAGE.md     # single self-contained HTML file
+decky usage [-o USAGE.md]                # write this guide to a local file
 ```
 
 `serve` starts a local HTTP server with a `/presenter` console and
@@ -54,7 +54,7 @@ headless Chrome to capture each slide and assemble a PDF — the thing to
 hand out or attach to an email. `html` bundles the CSS, JS, and every
 slide into one self-contained HTML file with no server required to view
 it — the thing to host as a static page (e.g. GitHub Pages) so a live
-gophern process isn't required just to view the deck online. `usage`
+decky process isn't required just to view the deck online. `usage`
 writes this exact tutorial deck to disk — handy if you installed with
 `go install` and don't have this repo cloned to read it from.
 
@@ -123,7 +123,7 @@ background: "#1e293b"
 
 <!--
 Global frontmatter must be the very first block in the file (before any
-slide content). If the file has no frontmatter at all, gophern falls back
+slide content). If the file has no frontmatter at all, decky falls back
 to sensible defaults: title "Presentation", aspectRatio "16:9".
 -->
 
@@ -236,7 +236,7 @@ color: "#f8fafc"
 
 Add an HTML comment at the very bottom of a slide's content — it never
 renders on screen, but shows up in the **presenter console**
-(`gophern serve` → open `/presenter`).
+(`decky serve` → open `/presenter`).
 
 ```markdown
 # Slide Title
@@ -265,14 +265,14 @@ JavaScript highlighter, no flash of unstyled code.
 ````markdown
 ```go
 func main() {
-    fmt.Println("gophern")
+    fmt.Println("decky")
 }
 ```
 ````
 
 ```go
 func main() {
-    fmt.Println("gophern")
+    fmt.Println("decky")
 }
 ```
 
@@ -321,7 +321,7 @@ color: "#f8fafc"
 # 11. Inline HTML & Styling
 
 ## Raw HTML passes through
-Gophern's markdown renderer allows raw HTML tags directly in your slide
+Decky's markdown renderer allows raw HTML tags directly in your slide
 content — for one-off styling that frontmatter fields don't cover.
 
 ```markdown
@@ -463,8 +463,8 @@ fonts:
 ---
 ```
 
-`gophern serve` and `/presenter` automatically fetch the named font from
-Google Fonts — no extra setup. `gophern export` and `gophern html` do
+`decky serve` and `/presenter` automatically fetch the named font from
+Google Fonts — no extra setup. `decky export` and `decky html` do
 **not** fetch fonts (to stay fully offline, self-contained output); an
 unavailable font falls back to the built-in stack (`Inter` / `Fira Code`)
 instead.
@@ -629,9 +629,9 @@ color: "#ffffff"
 # That's the whole toolkit
 ### Markdown in, presentation out.
 
-Project Home: [github.com/gophernment/gophern](https://github.com/gophernment/gophern)
+Project Home: [github.com/gophernment/decky](https://github.com/gophernment/decky)
 
-Try editing this file and watch `gophern serve` hot-reload instantly.
+Try editing this file and watch `decky serve` hot-reload instantly.
 
 <!--
 Closing slide. Encourage the reader to open USAGE.md next to the rendered

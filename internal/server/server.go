@@ -11,8 +11,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/gophernment/gophern/internal/parser"
-	"github.com/gophernment/gophern/web"
+	"github.com/gophernment/decky/internal/parser"
+	"github.com/gophernment/decky/web"
 )
 
 // Server keeps track of the presentation markdown file path,
@@ -92,7 +92,7 @@ func Start(markdownFile, port string, stdout io.Writer) error {
 // separate commands, two separate flags, shown as two separate lines so
 // neither is mistaken for producing the other's output format).
 func startupMessage(presentationURL, presenterURL, markdownFile string) string {
-	return fmt.Sprintf("\n  Presentation:  %s\n  Presenter:     %s\n\n  Export to PDF:   gophern export -o output.pdf %s\n  Export to HTML:  gophern html -o output.html %s\n\n",
+	return fmt.Sprintf("\n  Presentation:  %s\n  Presenter:     %s\n\n  Export to PDF:   decky export -o output.pdf %s\n  Export to HTML:  decky html -o output.html %s\n\n",
 		presentationURL, presenterURL, markdownFile, markdownFile)
 }
 

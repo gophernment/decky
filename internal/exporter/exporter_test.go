@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/gophernment/gophern/internal/exporter"
+	"github.com/gophernment/decky/internal/exporter"
 )
 
 func TestExport_ProducesPDFWithOnePagePerSlide(t *testing.T) {
