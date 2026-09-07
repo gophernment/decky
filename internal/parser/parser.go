@@ -275,6 +275,9 @@ func ParseMarkdownFile(path string) (*Presentation, error) {
 				if err != nil {
 					return nil, err
 				}
+				if slide.Fragments {
+					regionHTML = applyFragmentClasses(regionHTML)
+				}
 				renderedRegions[name] = regionHTML
 			}
 			slide.Regions = renderedRegions
