@@ -111,7 +111,7 @@ func TestCaptureSlides_OneImagePerSlide(t *testing.T) {
 	const deviceScale = 2.0
 	const wantImgWidth, wantImgHeight = int(cssWidth * deviceScale), int(cssHeight * deviceScale)
 
-	images, err := captureSlides(ctx, "file://"+htmlPath, 2, cssWidth, cssHeight, deviceScale)
+	images, _, err := captureSlides(ctx, "file://"+htmlPath, 2, cssWidth, cssHeight, deviceScale)
 	if err != nil {
 		t.Fatalf("captureSlides failed: %v", err)
 	}
@@ -165,7 +165,7 @@ func TestCaptureSlides_PreservesContentProportionsAtHigherDeviceScale(t *testing
 	const cssWidth, cssHeight = 200, 100
 	const deviceScale = 2.0
 
-	images, err := captureSlides(ctx, "file://"+htmlPath, 1, cssWidth, cssHeight, deviceScale)
+	images, _, err := captureSlides(ctx, "file://"+htmlPath, 1, cssWidth, cssHeight, deviceScale)
 	if err != nil {
 		t.Fatalf("captureSlides failed: %v", err)
 	}
@@ -189,6 +189,67 @@ func TestCaptureSlides_PreservesContentProportionsAtHigherDeviceScale(t *testing
 			" instead of rasterized at a higher device scale, reproducing the content-shrinks-relative-to-"+
 			"background bug.",
 			gotWidth, gotHeight, wantExtent, wantExtent, markerSizeCSSPx, deviceScale, markerSizeCSSPx)
+	}
+}
+
+// writeOverflowTestDeck builds a two-slide page mirroring the real
+// templates' id and scroll structure: each slide is id="slide-N", fills the
+// container, and has overflow-y:auto (so the live view scrolls). Slide 0's
+// content is deliberately far taller than the box; slide 1's fits.
+func writeOverflowTestDeck(t *testing.T, boxHeightCSSPx int) string {
+	t.Helper()
+	dir := t.TempDir()
+	htmlPath := filepath.Join(dir, "deck.html")
+	html := fmt.Sprintf(`<!DOCTYPE html>
+<html><head><style>
+  #slide-container { width: var(--slide-width); height: var(--slide-height); overflow: hidden; }
+  .slide { display: none; width: 100%%; height: 100%%; overflow-y: auto; box-sizing: border-box; }
+  .slide.active { display: block; }
+</style></head>
+<body style="--slide-width: 400px; --slide-height: %dpx;">
+  <div id="slide-container">
+    <div class="slide active" id="slide-0"><div style="height: %dpx;">tall</div></div>
+    <div class="slide" id="slide-1"><div style="height: 10px;">short</div></div>
+  </div>
+  <script>
+    window.goToSlide = function(i) {
+      document.querySelectorAll('.slide').forEach(function(s, idx) {
+        s.classList.toggle('active', idx === i);
+      });
+    };
+  </script>
+</body></html>`, boxHeightCSSPx, boxHeightCSSPx*3)
+	if err := os.WriteFile(htmlPath, []byte(html), 0o644); err != nil {
+		t.Fatalf("failed to write overflow test html: %v", err)
+	}
+	return htmlPath
+}
+
+// TestCaptureSlides_WarnsOnOverflow verifies captureSlides reports a warning
+// for a slide whose content is taller than the fixed slide box (the PDF
+// crops it, unlike the scrollable live view) and stays silent for one that
+// fits.
+func TestCaptureSlides_WarnsOnOverflow(t *testing.T) {
+	if !chromeAvailable() {
+		t.Skip("no local Chrome/Chromium found, skipping headless capture test")
+	}
+
+	const boxHeight = 120
+	htmlPath := writeOverflowTestDeck(t, boxHeight)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	_, warnings, err := captureSlides(ctx, "file://"+htmlPath, 2, 400, boxHeight, 1.0)
+	if err != nil {
+		t.Fatalf("captureSlides failed: %v", err)
+	}
+
+	if len(warnings) != 1 {
+		t.Fatalf("got %d warnings %v, want exactly 1 (for slide 1 only)", len(warnings), warnings)
+	}
+	if !bytes.Contains([]byte(warnings[0]), []byte("slide 1")) {
+		t.Errorf("warning does not name slide 1: %q", warnings[0])
 	}
 }
 

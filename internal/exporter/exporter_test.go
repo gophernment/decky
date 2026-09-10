@@ -2,6 +2,7 @@ package exporter_test
 
 import (
 	"bytes"
+	"io"
 	"os"
 	"path/filepath"
 	"testing"
@@ -53,7 +54,7 @@ Final slide.
 	}
 
 	outPath := filepath.Join(dir, "out.pdf")
-	if err := exporter.Export(mdPath, outPath); err != nil {
+	if err := exporter.Export(mdPath, outPath, io.Discard); err != nil {
 		t.Fatalf("export failed: %v", err)
 	}
 

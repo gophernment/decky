@@ -49,11 +49,17 @@ func chromeAvailable() bool {
 // property always wins over an ancestor's, even an ancestor :root rule with
 // !important. --scale, by contrast, is set on document.documentElement
 // (i.e. :root) by app.js, so overriding it on :root is correct.
+//
+// `.fragment` is forced visible: fragment step-reveal is a live-view
+// affordance (app.js adds `.visible` on next/prev), but the capture never
+// steps, so without this every `fragments: true` slide would export with
+// only its first fragment showing and the rest silently missing.
 const captureStyleOverrideTemplate = `
 body { --slide-width: %dpx !important; --slide-height: %dpx !important; }
 :root { --scale: 1 !important; }
 * { transition: none !important; }
 .nav-buttons, .progress-bar-container, .slide-number { display: none !important; }
+.fragment { opacity: 1 !important; }
 `
 
 // allImagesLoadedExpr resolves once every <img> currently in the document
@@ -87,7 +93,13 @@ Promise.all(Array.from(document.images).map(function(img) {
 // to (e.g. 2.0 for a sharper, higher-resolution image), so each output
 // image is cssWidthPx*deviceScale x cssHeightPx*deviceScale pixels.
 // slideCount must match the number of ".slide" elements the page renders.
-func captureSlides(ctx context.Context, pageURL string, slideCount, cssWidthPx, cssHeightPx int, deviceScale float64) ([][]byte, error) {
+//
+// The second return value is a list of human-readable warnings, one per
+// slide whose content is taller than the fixed slide box: the live view
+// lets such a slide scroll, but the capture crops it to cssHeightPx, so the
+// overflow is silently lost from the PDF unless the author is told to trim
+// or split it.
+func captureSlides(ctx context.Context, pageURL string, slideCount, cssWidthPx, cssHeightPx int, deviceScale float64) ([][]byte, []string, error) {
 	allocCtx, cancel := chromedp.NewExecAllocator(ctx, chromedp.DefaultExecAllocatorOptions[:]...)
 	defer cancel()
 
@@ -113,20 +125,39 @@ func captureSlides(ctx context.Context, pageURL string, slideCount, cssWidthPx, 
 		chromedp.Poll(allImagesLoadedExpr, &imagesLoaded, chromedp.WithPollingTimeout(15*time.Second)),
 	}
 	if err := chromedp.Run(browserCtx, tasks); err != nil {
-		return nil, fmt.Errorf("captureSlides: failed to load %s: %w", pageURL, err)
+		return nil, nil, fmt.Errorf("captureSlides: failed to load %s: %w", pageURL, err)
 	}
 
+	// overflowThresholdPx ignores sub-pixel rounding and hairline
+	// scrollHeight/clientHeight differences that don't actually clip
+	// anything visible.
+	const overflowThresholdPx = 4
+
+	var warnings []string
 	for i := 0; i < slideCount; i++ {
 		var buf []byte
+		var overflowPx int
 		err := chromedp.Run(browserCtx, chromedp.Tasks{
 			chromedp.Evaluate(fmt.Sprintf(`window.goToSlide(%d)`, i), nil),
+			chromedp.Evaluate(fmt.Sprintf(`
+				(function() {
+					var el = document.getElementById('slide-' + %d);
+					if (!el) return 0;
+					return Math.max(0, el.scrollHeight - el.clientHeight);
+				})()
+			`, i), &overflowPx),
 			chromedp.Screenshot("#slide-container", &buf, chromedp.NodeVisible, chromedp.ByID),
 		})
 		if err != nil {
-			return nil, fmt.Errorf("captureSlides: failed to capture slide %d: %w", i+1, err)
+			return nil, nil, fmt.Errorf("captureSlides: failed to capture slide %d: %w", i+1, err)
+		}
+		if overflowPx > overflowThresholdPx {
+			warnings = append(warnings, fmt.Sprintf(
+				"slide %d: content is %dpx taller than the slide and is cropped in the PDF — trim it or split the slide",
+				i+1, overflowPx))
 		}
 		images = append(images, buf)
 	}
 
-	return images, nil
+	return images, warnings, nil
 }

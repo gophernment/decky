@@ -20,7 +20,7 @@ var startServer = func(markdownFile, port string, stdout io.Writer) error {
 }
 
 var startExport = func(markdownFile, outputFile string, stdout io.Writer) error {
-	return exporter.Export(markdownFile, outputFile)
+	return exporter.Export(markdownFile, outputFile, stdout)
 }
 
 var startExportHTML = func(markdownFile, outputFile string, stdout io.Writer) error {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"html/template"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -26,7 +27,10 @@ const captureDeviceScale = 2.0
 // Export compiles the markdown presentation file into a single self-contained
 // PDF, with every slide (including any asset/ images it references) captured
 // as a full-resolution image via a locally installed headless Chrome.
-func Export(markdownPath, outputPath string) error {
+//
+// warn receives one line per slide whose content overflows the fixed slide
+// box (and is therefore cropped in the PDF); pass io.Discard to suppress.
+func Export(markdownPath, outputPath string, warn io.Writer) error {
 	pres, err := parser.ParseMarkdownFile(markdownPath)
 	if err != nil {
 		return err
@@ -57,9 +61,14 @@ func Export(markdownPath, outputPath string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
 	defer cancel()
 
-	images, err := captureSlides(ctx, pageURL, len(pres.Slides), pres.SlideWidthPx, pres.SlideHeightPx, captureDeviceScale)
+	images, overflowWarnings, err := captureSlides(ctx, pageURL, len(pres.Slides), pres.SlideWidthPx, pres.SlideHeightPx, captureDeviceScale)
 	if err != nil {
 		return err
+	}
+	if warn != nil {
+		for _, w := range overflowWarnings {
+			fmt.Fprintln(warn, "⚠ "+w)
+		}
 	}
 
 	captureWidth := int(float64(pres.SlideWidthPx) * captureDeviceScale)
