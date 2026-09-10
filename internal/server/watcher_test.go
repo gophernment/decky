@@ -60,7 +60,7 @@ func TestWatchFile(t *testing.T) {
 	}
 
 	// Now modify the file
-	time.Sleep(100 * time.Millisecond) // wait a bit to avoid mod time conflict
+	time.Sleep(100 * time.Millisecond)     // wait a bit to avoid mod time conflict
 	now := time.Now().Add(5 * time.Second) // future mod time to ensure watcher detects change
 	if err := os.Chtimes(tmpFile.Name(), now, now); err != nil {
 		t.Fatalf("failed to touch file: %v", err)
