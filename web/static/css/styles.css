@@ -578,6 +578,14 @@ pre::-webkit-scrollbar-thumb:hover {
    scaled down as a whole (--thumb-scale / --thumb-h are set by app.js from
    the deck dimensions). Built and toggled by app.js — key `o`, the ⊞ button,
    or Escape to close. */
+/* An author `display` declaration overrides the UA stylesheet's
+   `[hidden] { display: none }`, so the toggle attribute would otherwise
+   leave this full-screen grid painting over the deck (a black screen on
+   load). Restore it explicitly; app.js flips the `hidden` attribute. */
+.overview[hidden] {
+  display: none;
+}
+
 .overview {
   position: fixed;
   inset: 0;

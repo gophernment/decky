@@ -71,8 +71,10 @@ third
 
 	var (
 		hiddenBefore  bool
+		displayBefore string
 		thumbCount    int
 		hiddenOpen    bool
+		displayOpen   string
 		currentIndex  int
 		hiddenAfter   bool
 		hiddenOnEsc   bool
@@ -83,13 +85,18 @@ third
 		chromedp.Navigate(ts.URL),
 		chromedp.WaitVisible("#slide-container", chromedp.ByID),
 
-		// Overview starts closed and unbuilt.
+		// Overview starts closed and unbuilt. `hidden` must also translate to
+		// an actual `display: none` — a `.overview { display: grid }` rule
+		// would otherwise override the UA [hidden] style and leave the empty
+		// full-screen grid covering the deck (black screen on load).
 		chromedp.Evaluate(`document.getElementById('overview').hidden`, &hiddenBefore),
+		chromedp.Evaluate(`getComputedStyle(document.getElementById('overview')).display`, &displayBefore),
 
 		// `o` opens it and builds one tile per slide.
 		chromedp.KeyEvent("o"),
 		chromedp.WaitVisible("#overview .thumb", chromedp.ByQuery),
 		chromedp.Evaluate(`document.getElementById('overview').hidden`, &hiddenOpen),
+		chromedp.Evaluate(`getComputedStyle(document.getElementById('overview')).display`, &displayOpen),
 		chromedp.Evaluate(`document.querySelectorAll('#overview .thumb').length`, &thumbCount),
 
 		// Clicking the third tile jumps the deck there and closes the grid.
@@ -111,8 +118,14 @@ third
 	if !hiddenBefore {
 		t.Error("overview should be hidden before it is opened")
 	}
+	if displayBefore != "none" {
+		t.Errorf("hidden overview must compute to display:none, got %q (deck is covered by the empty grid)", displayBefore)
+	}
 	if hiddenOpen {
 		t.Error("overview should be visible after pressing 'o'")
+	}
+	if displayOpen == "none" {
+		t.Errorf("open overview must not be display:none, got %q", displayOpen)
 	}
 	if thumbCount != 3 {
 		t.Errorf("expected 3 thumbnails (one per slide), got %d", thumbCount)
