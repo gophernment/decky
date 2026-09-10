@@ -16,9 +16,10 @@ color: "#ffffff"
 ### A complete, runnable tour of every feature
 
 This deck is a real `.md` file — run it with `decky serve USAGE.md`
-and navigate with **→**, **Space**, or **Page Down**. A fullscreen
-button sits in the bottom-right corner; the prev/next buttons and slide
-number are off by default (turned on for this deck — see slide 19).
+and navigate with **→**, **Space**, or **Page Down**. Press **`o`** for
+a thumbnail overview of every slide. A fullscreen button sits in the
+bottom-right corner; the prev/next buttons and slide number are off by
+default (turned on for this deck — see slide 19).
 
 <!--
 This is USAGE.md: a hands-on manual. Every syntax shown on a slide is the
@@ -564,12 +565,18 @@ showSlideNumber: true
 ```
 
 Leave them unset (or `false`) for a chrome-free presentation. The
-fullscreen button in the bottom-right is always visible either way.
+fullscreen button (`⛶`) and the slide-overview button (`⊞`) in the
+bottom-right are always visible either way.
+
+Press **`o`** (or click `⊞`) any time for a **thumbnail overview** of
+every slide; click a thumbnail to jump there, or press **`Esc`** to
+close.
 
 <!--
-Both keys default to false (hidden) and only affect the live serve
-Presentation View — the Presenter Console and exported HTML always show
-their own controls unconditionally.
+showControls / showSlideNumber default to false (hidden) and only affect
+the live serve Presentation View — the Presenter Console and exported
+HTML always show their own controls unconditionally. The overview grid
+(`o`) is always available in the Presentation View.
 -->
 
 ---

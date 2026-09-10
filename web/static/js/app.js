@@ -124,21 +124,154 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // ---- Slide overview (thumbnail grid) ----
+  // Clones every .slide into a scaled-down tile inside #overview, laid out as
+  // a grid. Built lazily on first open; hot-reload does a full page reload so
+  // it always rebuilds fresh. Clicking a tile jumps the deck there (which
+  // broadcasts over SSE like any other nav) and closes the grid.
+  const overviewEl = document.getElementById('overview');
+  const btnOverview = document.getElementById('btn-overview');
+  let overviewBuilt = false;
+
+  function buildOverview() {
+    if (overviewBuilt || !overviewEl || slides.length === 0) return;
+
+    // The clone is rendered at the deck's native slide box and then CSS-scaled
+    // as a whole (same trick the live view uses via --scale), so content
+    // authored in rem/px stays proportional. --thumb-w is the tile width;
+    // derive the scale factor and exact tile height from the deck dimensions.
+    const cs = getComputedStyle(container);
+    const slideW = parseFloat(cs.getPropertyValue('--slide-width')) || 960;
+    const slideH = parseFloat(cs.getPropertyValue('--slide-height')) || 540;
+    const thumbW = parseFloat(getComputedStyle(overviewEl).getPropertyValue('--thumb-w')) || 240;
+    overviewEl.style.setProperty('--thumb-scale', (thumbW / slideW).toFixed(6));
+    overviewEl.style.setProperty('--thumb-h', (thumbW * slideH / slideW).toFixed(2) + 'px');
+
+    const frag = document.createDocumentFragment();
+    slides.forEach((slide, i) => {
+      const tile = document.createElement('button');
+      tile.type = 'button';
+      tile.className = 'thumb';
+      tile.setAttribute('aria-label', `Go to slide ${i + 1}`);
+
+      // Per-slide headingColors CSS is a <style> sibling emitted just before
+      // the slide, scoped to #slide-N. Re-scope a copy to the clone's new id
+      // so gradient/colored headings still show in the thumbnail.
+      const styleSib = slide.previousElementSibling;
+      if (styleSib && styleSib.tagName === 'STYLE') {
+        const scoped = document.createElement('style');
+        scoped.textContent = styleSib.textContent.replace(
+          new RegExp('#slide-' + i + '\\b', 'g'), '#overview-slide-' + i);
+        tile.appendChild(scoped);
+      }
+
+      const scaler = document.createElement('div');
+      scaler.className = 'thumb-scaler';
+
+      const clone = slide.cloneNode(true);
+      clone.id = 'overview-slide-' + i;
+      clone.classList.remove('active', 'past', 'future');
+      clone.querySelectorAll('.fragment').forEach((f) => f.classList.add('visible'));
+      clone.querySelectorAll('a, button, input, textarea, select').forEach((el) => {
+        el.setAttribute('tabindex', '-1');
+      });
+
+      scaler.appendChild(clone);
+      tile.appendChild(scaler);
+
+      const num = document.createElement('span');
+      num.className = 'thumb-num';
+      num.textContent = String(i + 1);
+      tile.appendChild(num);
+
+      tile.addEventListener('click', () => {
+        goToSlide(i);
+        closeOverview();
+      });
+      frag.appendChild(tile);
+    });
+    overviewEl.appendChild(frag);
+    overviewBuilt = true;
+  }
+
+  function markCurrentThumb() {
+    if (!overviewBuilt) return;
+    const tiles = overviewEl.querySelectorAll('.thumb');
+    tiles.forEach((t, i) => t.classList.toggle('current', i === currentIndex));
+  }
+
+  function isOverviewOpen() {
+    return overviewEl && !overviewEl.hidden;
+  }
+
+  function openOverview() {
+    if (!overviewEl) return;
+    buildOverview();
+    overviewEl.hidden = false;
+    document.body.classList.add('overview-open');
+    markCurrentThumb();
+    const current = overviewEl.querySelector('.thumb.current');
+    if (current) current.scrollIntoView({ block: 'center' });
+  }
+
+  function closeOverview() {
+    if (!overviewEl) return;
+    overviewEl.hidden = true;
+    document.body.classList.remove('overview-open');
+  }
+
+  function toggleOverview() {
+    if (isOverviewOpen()) {
+      closeOverview();
+    } else {
+      openOverview();
+    }
+  }
+
+  if (btnOverview) {
+    btnOverview.addEventListener('click', toggleOverview);
+  }
+
+  // Keep the highlight in sync when the slide changes while the grid is open
+  // (e.g. another viewer navigates over SSE).
+  document.addEventListener('slidechange', () => {
+    if (isOverviewOpen()) markCurrentThumb();
+  });
+
   // Bind Keyboard Navigation
   window.addEventListener('keydown', (e) => {
     const activeEl = document.activeElement;
 
     // Ignore keypresses if the focus is on input fields, textareas, select dropdowns, or contenteditable elements
     if (activeEl && (
-        activeEl.tagName === 'INPUT' || 
-        activeEl.tagName === 'TEXTAREA' || 
-        activeEl.tagName === 'SELECT' || 
+        activeEl.tagName === 'INPUT' ||
+        activeEl.tagName === 'TEXTAREA' ||
+        activeEl.tagName === 'SELECT' ||
         activeEl.isContentEditable)) {
       return;
     }
 
     // If a button is focused, only ignore Spacebar to prevent double activation, but allow arrows
     if (activeEl && activeEl.tagName === 'BUTTON' && e.key === ' ') {
+      return;
+    }
+
+    // `o` toggles the slide overview from anywhere.
+    if (e.key === 'o' || e.key === 'O') {
+      e.preventDefault();
+      toggleOverview();
+      return;
+    }
+
+    // While the overview covers the deck, only Escape (close) acts; swallow
+    // deck-navigation keys so the hidden deck doesn't move underneath it.
+    if (isOverviewOpen()) {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        closeOverview();
+      } else if (['ArrowRight', 'ArrowLeft', ' ', 'PageDown', 'PageUp'].includes(e.key)) {
+        e.preventDefault();
+      }
       return;
     }
 

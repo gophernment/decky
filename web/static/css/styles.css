@@ -572,3 +572,100 @@ pre::-webkit-scrollbar-thumb:hover {
   grid-template-rows: 1fr 1fr;
   grid-template-areas: "tl tr" "bl br";
 }
+
+/* Slide overview (thumbnail grid). A fixed overlay filling the viewport; each
+   tile holds a live clone of a .slide rendered at the deck's native box and
+   scaled down as a whole (--thumb-scale / --thumb-h are set by app.js from
+   the deck dimensions). Built and toggled by app.js — key `o`, the ⊞ button,
+   or Escape to close. */
+.overview {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  overflow-y: auto;
+  padding: 2rem;
+  background-color: var(--bg-main);
+  background-image: var(--bg-gradient);
+  display: grid;
+  grid-template-columns: repeat(auto-fill, var(--thumb-w));
+  gap: 1.25rem;
+  justify-content: center;
+  align-content: start;
+
+  /* Tile width; scale factor and exact height are derived from this and the
+     deck's --slide-width/--slide-height by app.js at build time. */
+  --thumb-w: 240px;
+}
+
+.overview .thumb {
+  position: relative;
+  width: var(--thumb-w);
+  height: var(--thumb-h, calc(var(--thumb-w) * 9 / 16));
+  overflow: hidden;
+  padding: 0;
+  border: 2px solid var(--border-slide);
+  border-radius: 10px;
+  background: var(--slide-bg);
+  cursor: pointer;
+  transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.overview .thumb:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-primary);
+}
+
+.overview .thumb:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+.overview .thumb.current {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.35);
+}
+
+.overview .thumb-scaler {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--slide-width);
+  height: var(--slide-height);
+  transform: scale(var(--thumb-scale, 0.25));
+  transform-origin: top left;
+  pointer-events: none;
+}
+
+/* Neutralise the transition-state classes and scroll behaviour a cloned
+   .slide carries so every thumbnail shows its slide fully, at rest. */
+.overview .thumb-scaler .slide {
+  position: absolute;
+  inset: 0;
+  width: var(--slide-width);
+  height: var(--slide-height);
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.overview .thumb-num {
+  position: absolute;
+  left: 6px;
+  bottom: 6px;
+  padding: 1px 7px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 6px;
+}
+
+/* The overview overlay (z-index 1000) sits above the nav buttons (z-index
+   100); dim them so they don't ghost through the grid. Close with `o`,
+   Escape, or by clicking a slide. */
+body.overview-open .nav-buttons {
+  opacity: 0.15;
+  pointer-events: none;
+}

@@ -65,6 +65,8 @@ Navigating slides on either window (using arrow keys, space, or buttons) will au
 
 A fullscreen toggle button always sits in the bottom-right corner of the **Presentation View**. The prev/next nav buttons and the slide-number indicator (`1 / 12`) are hidden by default — enable them per deck with `showControls` / `showSlideNumber` in the global frontmatter (see [Show/Hide Navigation Controls](#showhide-navigation-controls)).
 
+Press **`o`** (or the `⊞` button) for a **thumbnail overview** of every slide; click a thumbnail to jump there, `Esc` to close. Selecting a slide syncs the other window over SSE like any other navigation.
+
 ### 2. Export Standalone Slide Deck (`export`)
 Export the presentation into a single self-contained PDF for distribution or offline use:
 

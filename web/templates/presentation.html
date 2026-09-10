@@ -35,8 +35,13 @@
         <button id="btn-prev" class="nav-btn" aria-label="Previous Slide">← Prev</button>
         <button id="btn-next" class="nav-btn" aria-label="Next Slide">Next →</button>
         {{ end }}
+        <button id="btn-overview" class="nav-btn" aria-label="Slide Overview (o)">⊞</button>
         <button id="btn-fullscreen" class="nav-btn" aria-label="Toggle Fullscreen">⛶</button>
     </div>
+
+    <!-- Slide overview grid. Empty on load; app.js clones every .slide into a
+         thumbnail tile the first time it's opened (key `o` / the ⊞ button). -->
+    <div id="overview" class="overview" hidden></div>
 
     <!-- Embed presentation javascript -->
     <script src="/static/js/app.js" defer></script>
