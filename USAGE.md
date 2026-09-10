@@ -102,8 +102,8 @@ Every slide can start with a YAML frontmatter block (`---` ... `---`)
 setting properties for that slide.
 
 - **Global**: put it on **Slide 0** (the very first block in the file).
-  It sets defaults — `title`, `author`, `theme`, `aspectRatio`, `fonts` —
-  that apply to the whole deck.
+  It sets defaults — `title`, `author`, `theme`, `aspectRatio`, `fonts`,
+  `css` — that apply to the whole deck (see slide 11 for `css`).
 - **Local**: any later slide's own frontmatter block overrides `layout`,
   `background`, `color`, `headerFont`, etc. for **that slide only**.
 
@@ -139,6 +139,7 @@ color: "#f8fafc"
 - `layout` — one of `default`, `cover`, `two-cols`, `split-h`, `split-v`, `split-3`, `grid-4`
 - `background` — any CSS `background` value (color, gradient, image URL)
 - `color` — the slide's base text color
+- `align` — `left`, `center`, or `right`; overrides the slide's content alignment. Mainly used to opt a `cover` slide out of its default centered look. Any other value is ignored.
 - `headerFont` — overrides just this slide's `<h1>` font
 - `fragments` — step-reveal this slide's list items one at a time (see slide 20)
 
@@ -195,6 +196,8 @@ color: "#ffffff"
 <!--
 cover centers everything both horizontally and vertically and applies a
 larger, gradient-accented heading style — this very slide is the example.
+Add `align: left` (or `right`) to this slide's frontmatter to keep the
+large cover heading but left-align the content instead of centering it.
 -->
 
 ---
@@ -339,6 +342,27 @@ content — for one-off styling that frontmatter fields don't cover.
 the exact snippet above. Prefer `background`/`color`/`headerFont`
 frontmatter for whole-slide styling — reach for inline HTML only for
 small, one-off cases those fields don't reach.
+
+## Deck-wide CSS: the `css:` key
+
+For overrides that apply to every slide, put a `css:` block in the
+**global** frontmatter (Slide 0). Its contents are emitted in a `<style>`
+block after decky's built-in stylesheet, so any rule you write wins the
+cascade. Works in `serve`, `/presenter`, `export`, and `html`.
+
+```markdown
+---
+title: "My Deck"
+css: |
+  .slide table { border: 2px solid #0f172a; }
+  .slide h1   { letter-spacing: 0; text-transform: none; }
+  .slide pre  { font-size: 0.85rem; }
+---
+```
+
+It is your file, so the CSS is used verbatim — there is no sanitizing.
+Keep it small and targeted; it is the escape hatch for the handful of
+things the dedicated frontmatter fields don't cover.
 
 ---
 layout: "split-h"

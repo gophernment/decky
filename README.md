@@ -13,6 +13,7 @@
 - **SSE Real-Time Sync**: Synchronizes slide navigation in real-time between the main viewer and presenter console.
 - **Self-Contained Export**: Renders every slide via a locally installed headless Chrome and assembles them into a single, portable PDF that can be opened offline anywhere.
 - **Self-Contained HTML Export**: Bundles every slide, plus all CSS and JS, into a single static HTML file that needs no server or network access to view.
+- **Deck-wide Custom CSS**: A global `css:` frontmatter key injects arbitrary CSS after the built-in stylesheet, so any rule can be overridden without forking the tool.
 
 ---
 
@@ -126,8 +127,20 @@ color: "#ffffff"
 
 ### Supported Layouts
 - `default`: Normal vertical flex layout.
-- `cover`: Centered cover page layout with gradient background support.
+- `cover`: Centered cover page layout with gradient background support. Add `align: left` (or `right`) to a slide to keep the large cover heading but stop centering the content.
 - `two-cols`: Dual-column layout (useful for side-by-side text/images or text/code blocks).
+
+### Deck-wide Custom CSS
+Put a `css:` block in the **global** frontmatter (Slide 0) for overrides that apply to every slide. It is emitted after decky's built-in stylesheet, so any rule you write wins the cascade. Works in `serve`, `/presenter`, `export`, and `html`.
+
+```markdown
+---
+title: "Project Pitch"
+css: |
+  .slide table { border: 2px solid #0f172a; }
+  .slide h1   { letter-spacing: 0; }
+---
+```
 
 ### Custom Fonts
 Set the deck's main fonts with `fonts.sans` / `fonts.mono` in the global frontmatter (first slide). Override just one slide's heading font with `headerFont` in that slide's local frontmatter — everything else on the slide keeps using the main font.

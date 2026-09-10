@@ -48,6 +48,7 @@ func ExportHTML(markdownPath, outputPath string) error {
 		Fonts           parser.FontsConfig
 		Slides          []parser.Slide
 		CSS             template.CSS
+		CustomCSS       template.CSS
 		JS              template.JS
 		SlideWidthPx    int
 		SlideHeightPx   int
@@ -60,6 +61,7 @@ func ExportHTML(markdownPath, outputPath string) error {
 		Fonts:           pres.Fonts,
 		Slides:          pres.Slides,
 		CSS:             template.CSS(cssBytes),
+		CustomCSS:       template.CSS(pres.CustomCSS),
 		JS:              template.JS(jsBytes),
 		SlideWidthPx:    pres.SlideWidthPx,
 		SlideHeightPx:   pres.SlideHeightPx,

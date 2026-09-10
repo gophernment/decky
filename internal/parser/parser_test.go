@@ -1596,3 +1596,118 @@ headingColors:
 		t.Errorf("Expected slide 1 h2 to fall back to the global value, got %q", css1)
 	}
 }
+
+func TestCustomCSS(t *testing.T) {
+	t.Run("global css block is parsed onto the presentation verbatim", func(t *testing.T) {
+		tmpFile, err := os.CreateTemp("", "slides-custom-css-*.md")
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer os.Remove(tmpFile.Name())
+
+		content := `---
+title: Custom CSS Test
+css: |
+  .slide table { border: 2px solid #000; }
+  h1 { letter-spacing: 0; }
+---
+# Slide 1
+
+| a | b |
+|---|---|
+| 1 | 2 |
+`
+		if _, err := tmpFile.WriteString(content); err != nil {
+			t.Fatal(err)
+		}
+		tmpFile.Close()
+
+		pres, err := ParseMarkdownFile(tmpFile.Name())
+		if err != nil {
+			t.Fatalf("ParseMarkdownFile failed: %v", err)
+		}
+		if !strings.Contains(pres.CustomCSS, ".slide table { border: 2px solid #000; }") {
+			t.Errorf("Expected CustomCSS to contain the table rule, got %q", pres.CustomCSS)
+		}
+		if !strings.Contains(pres.CustomCSS, "h1 { letter-spacing: 0; }") {
+			t.Errorf("Expected CustomCSS to contain the h1 rule, got %q", pres.CustomCSS)
+		}
+	})
+
+	t.Run("no css key leaves CustomCSS empty", func(t *testing.T) {
+		tmpFile, err := os.CreateTemp("", "slides-no-custom-css-*.md")
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer os.Remove(tmpFile.Name())
+
+		if _, err := tmpFile.WriteString("---\ntitle: No CSS\n---\n# Slide 1\n"); err != nil {
+			t.Fatal(err)
+		}
+		tmpFile.Close()
+
+		pres, err := ParseMarkdownFile(tmpFile.Name())
+		if err != nil {
+			t.Fatalf("ParseMarkdownFile failed: %v", err)
+		}
+		if pres.CustomCSS != "" {
+			t.Errorf("Expected empty CustomCSS, got %q", pres.CustomCSS)
+		}
+	})
+}
+
+func TestSlideAlign(t *testing.T) {
+	t.Run("per-slide align is normalized and kept only for valid values", func(t *testing.T) {
+		tmpFile, err := os.CreateTemp("", "slides-align-*.md")
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer os.Remove(tmpFile.Name())
+
+		content := `---
+title: Align Test
+layout: cover
+align: LEFT
+---
+# Cover
+
+---
+layout: cover
+align: right
+---
+# Two
+
+---
+align: sideways
+---
+# Three
+
+---
+# Four
+`
+		if _, err := tmpFile.WriteString(content); err != nil {
+			t.Fatal(err)
+		}
+		tmpFile.Close()
+
+		pres, err := ParseMarkdownFile(tmpFile.Name())
+		if err != nil {
+			t.Fatalf("ParseMarkdownFile failed: %v", err)
+		}
+		if len(pres.Slides) != 4 {
+			t.Fatalf("Expected 4 slides, got %d", len(pres.Slides))
+		}
+		if pres.Slides[0].Align != "left" {
+			t.Errorf("slide 0 (global align: LEFT): expected %q, got %q", "left", pres.Slides[0].Align)
+		}
+		if pres.Slides[1].Align != "right" {
+			t.Errorf("slide 1: expected %q, got %q", "right", pres.Slides[1].Align)
+		}
+		if pres.Slides[2].Align != "" {
+			t.Errorf("slide 2 (invalid align): expected dropped to %q, got %q", "", pres.Slides[2].Align)
+		}
+		if pres.Slides[3].Align != "" {
+			t.Errorf("slide 3 (no align): expected %q, got %q", "", pres.Slides[3].Align)
+		}
+	})
+}

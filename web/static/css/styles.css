@@ -154,6 +154,39 @@ body {
   padding: 4rem;
 }
 
+/* Content-alignment override (slide frontmatter: align: left|center|right).
+   Works on any layout; the common case is opting a `cover` slide out of its
+   default centered look. `align-items` governs the cross-axis position of the
+   flex column, `text-align` the inline text/heading alignment, and the
+   `max-width: none` on cover's constrained h2/p lets left-aligned subtitles
+   use the full slide width. */
+.slide.align-left {
+  align-items: flex-start;
+  text-align: left;
+}
+
+.slide.align-center {
+  align-items: center;
+  text-align: center;
+}
+
+.slide.align-right {
+  align-items: flex-end;
+  text-align: right;
+}
+
+.slide.align-left.cover,
+.slide.align-right.cover {
+  justify-content: center;
+}
+
+.slide.align-left.cover h2,
+.slide.align-left.cover p,
+.slide.align-right.cover h2,
+.slide.align-right.cover p {
+  max-width: none;
+}
+
 .slide.cover h1 {
   font-size: 3.5rem;
   font-weight: 800;
@@ -283,6 +316,35 @@ blockquote p {
   color: var(--slide-text-color, var(--text-primary));
 }
 
+/* Tables (goldmark's Table extension emits <table><thead><tr><th>…). Without
+   these rules the browser default renders them borderless and cramped, which
+   reads as broken on a slide. */
+.slide table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.5rem 0;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.slide th,
+.slide td {
+  border: 1px solid var(--border-slide);
+  padding: 0.6rem 0.9rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.slide thead th {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--slide-text-color, var(--text-primary));
+  font-weight: 600;
+}
+
+.slide tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.025);
+}
+
 /* Code block and syntax highlighting */
 pre {
   background: #fefce8 !important; /* Soft warm yellow */
@@ -304,6 +366,19 @@ code {
   padding: 0.2rem 0.4rem;
   border-radius: 4px;
   font-size: 0.9em;
+}
+
+/* Disable programming ligatures in code. Fira Code (the default mono stack)
+   fuses "---", "--", "->", "=>", "!=" etc. into single glyphs, so a slide
+   showing literal YAML front matter ("---"), CLI output, or a diff renders
+   those sequences as one long dash. A presentation tool must show the
+   characters as typed. */
+pre,
+code,
+pre *,
+code * {
+  font-variant-ligatures: none;
+  font-feature-settings: "liga" 0, "calt" 0;
 }
 
 pre code {

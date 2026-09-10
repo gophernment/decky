@@ -67,7 +67,15 @@ type Presentation struct {
 	// See Slide.HeadingColors and mergeHeadingColors (Task 2).
 	HeadingColors map[string]string `yaml:"headingColors"`
 
-	Slides      []Slide
+	// CustomCSS is a raw CSS string set deck-wide via the global front
+	// matter's `css:` key (typically a YAML block scalar). Every render
+	// path (serve, presenter, export, html) emits it in a <style> block
+	// placed after the built-in stylesheet so it wins the cascade,
+	// letting a deck author override any built-in rule without forking
+	// the tool. It is trusted verbatim — it is the author's own file.
+	CustomCSS string `yaml:"css"`
+
+	Slides []Slide
 
 	// ShowControls and ShowSlideNumber toggle the prev/next nav buttons and
 	// the slide-number indicator ("1 / 66") in the live presentation view.
@@ -99,12 +107,19 @@ type FontsConfig struct {
 
 // Slide represents a single slide in the presentation.
 type Slide struct {
-	Index        int
-	RawMarkdown  string
-	HTMLContent  string
-	Layout       string `yaml:"layout"`
-	Background   string `yaml:"background"`
-	Color        string `yaml:"color"`
+	Index       int
+	RawMarkdown string
+	HTMLContent string
+	Layout      string `yaml:"layout"`
+	Background  string `yaml:"background"`
+	Color       string `yaml:"color"`
+
+	// Align overrides the slide's content alignment ("left", "center", or
+	// "right"), emitted as an `align-<value>` class by web/templates/_slide.html.
+	// Any other value is dropped during parsing. Its main use is opting a
+	// `cover` slide out of its default centered layout. Slide 0 inherits the
+	// global block's value, like Layout/Background/Color.
+	Align            string `yaml:"align"`
 	SpeakerNotes     string
 	SpeakerNotesHTML string
 
@@ -153,7 +168,7 @@ func ParseMarkdownFile(path string) (*Presentation, error) {
 		Theme:       "default",
 	}
 
-	var slide0Layout, slide0Background, slide0Color string
+	var slide0Layout, slide0Background, slide0Color, slide0Align string
 	var slide0Ratio, slide0Cols, slide0Rows string
 	var slide0HeaderFont string
 	var slide0Fragments bool
@@ -186,6 +201,9 @@ func ParseMarkdownFile(path string) (*Presentation, error) {
 					if len(globalConfig.HeadingColors) > 0 {
 						pres.HeadingColors = globalConfig.HeadingColors
 					}
+					if globalConfig.CustomCSS != "" {
+						pres.CustomCSS = globalConfig.CustomCSS
+					}
 					pres.ShowControls = globalConfig.ShowControls
 					pres.ShowSlideNumber = globalConfig.ShowSlideNumber
 				}
@@ -195,6 +213,7 @@ func ParseMarkdownFile(path string) (*Presentation, error) {
 					slide0Layout = slide0Config.Layout
 					slide0Background = slide0Config.Background
 					slide0Color = slide0Config.Color
+					slide0Align = slide0Config.Align
 					slide0Ratio = slide0Config.Ratio
 					slide0Cols = slide0Config.Cols
 					slide0Rows = slide0Config.Rows
@@ -221,6 +240,7 @@ func ParseMarkdownFile(path string) (*Presentation, error) {
 			slide.Layout = slide0Layout
 			slide.Background = slide0Background
 			slide.Color = slide0Color
+			slide.Align = slide0Align
 			slide.Ratio = slide0Ratio
 			slide.Cols = slide0Cols
 			slide.Rows = slide0Rows
@@ -294,6 +314,8 @@ func ParseMarkdownFile(path string) (*Presentation, error) {
 			slide.ColsCSS = ratioToGridTemplate(slide.Cols, 2)
 			slide.RowsCSS = ratioToGridTemplate(slide.Rows, 2)
 		}
+
+		slide.Align = normalizeAlign(slide.Align)
 
 		merged := mergeHeadingColors(pres.HeadingColors, slide.HeadingColors)
 		slide.HeadingColorCSS = buildHeadingColorCSS(slide.Index, merged)
@@ -415,6 +437,22 @@ func buildHeadingColorCSS(slideIndex int, merged map[string]string) template.CSS
 	return template.CSS(b.String())
 }
 
+// normalizeAlign lower-cases and validates a slide's `align` value, returning
+// "" (no alignment override) for anything that isn't "left", "center", or
+// "right" so web/templates/_slide.html never emits a bogus align-* class.
+func normalizeAlign(align string) string {
+	switch strings.ToLower(strings.TrimSpace(align)) {
+	case "left":
+		return "left"
+	case "center":
+		return "center"
+	case "right":
+		return "right"
+	default:
+		return ""
+	}
+}
+
 // splitBySeparator splits the markdown content by lines that are exactly "---".
 func splitBySeparator(content string) []string {
 	content = strings.ReplaceAll(content, "\r\n", "\n")
@@ -530,9 +568,11 @@ var coreFrontmatterKeys = map[string]bool{
 	"author":          true,
 	"theme":           true,
 	"aspectRatio":     true,
+	"css":             true,
 	"layout":          true,
 	"background":      true,
 	"color":           true,
+	"align":           true,
 	"class":           true,
 	"transition":      true,
 	"disabled":        true,

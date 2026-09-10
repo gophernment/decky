@@ -104,6 +104,7 @@ func renderTempHTML(markdownPath string, pres *parser.Presentation) (string, err
 		SlideWidthPx    int
 		SlideHeightPx   int
 		CSS             template.CSS
+		CustomCSS       template.CSS
 		JS              template.JS
 		ShowControls    bool
 		ShowSlideNumber bool
@@ -116,6 +117,7 @@ func renderTempHTML(markdownPath string, pres *parser.Presentation) (string, err
 		SlideWidthPx:    pres.SlideWidthPx,
 		SlideHeightPx:   pres.SlideHeightPx,
 		CSS:             template.CSS(cssBytes),
+		CustomCSS:       template.CSS(pres.CustomCSS),
 		JS:              template.JS(jsBytes),
 		ShowControls:    pres.ShowControls,
 		ShowSlideNumber: pres.ShowSlideNumber,

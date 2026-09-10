@@ -281,6 +281,11 @@
             cursor: not-allowed;
         }
     </style>
+    {{ if .CustomCSS }}
+    <!-- Deck-wide overrides from the global front matter's css: key. Placed
+         last so they win the cascade against static/css/styles.css. -->
+    <style>{{ .CustomCSS }}</style>
+    {{ end }}
 </head>
 <body style="--slide-width: {{ .SlideWidthPx }}px; --slide-height: {{ .SlideHeightPx }}px;{{ if .Fonts.Sans }}--font-sans: {{ sansFontFamily .Fonts.Sans }};{{ end }}{{ if .Fonts.Mono }}--font-mono: {{ monoFontFamily .Fonts.Mono }};{{ end }}">
     <!-- Presenter Header -->

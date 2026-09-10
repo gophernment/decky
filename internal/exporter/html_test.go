@@ -130,3 +130,44 @@ headingColors:
 		t.Errorf("expected scoped solid-color CSS rule for slide 0 h3, got: %s", html)
 	}
 }
+
+func TestExportHTML_CustomCSSAndAlign(t *testing.T) {
+	dir := t.TempDir()
+	mdPath := filepath.Join(dir, "deck.md")
+
+	content := `---
+title: Custom CSS Export Test
+layout: cover
+align: left
+css: |
+  .slide table { border: 3px dashed magenta; }
+---
+# Cover slide
+`
+	if err := os.WriteFile(mdPath, []byte(content), 0o644); err != nil {
+		t.Fatalf("failed to write markdown: %v", err)
+	}
+
+	outPath := filepath.Join(dir, "out.html")
+	if err := exporter.ExportHTML(mdPath, outPath); err != nil {
+		t.Fatalf("ExportHTML failed: %v", err)
+	}
+
+	htmlBytes, err := os.ReadFile(outPath)
+	if err != nil {
+		t.Fatalf("failed to read output html: %v", err)
+	}
+	html := string(htmlBytes)
+
+	cssIdx := strings.Index(html, ".slide table { border: 3px dashed magenta; }")
+	if cssIdx == -1 {
+		t.Fatalf("expected custom CSS in output, got: %s", html)
+	}
+	builtinIdx := strings.Index(html, "border-collapse: collapse")
+	if builtinIdx == -1 || cssIdx < builtinIdx {
+		t.Errorf("expected custom CSS to appear after the built-in stylesheet, customIdx=%d builtinIdx=%d", cssIdx, builtinIdx)
+	}
+	if !strings.Contains(html, `class="slide cover align-left"`) {
+		t.Errorf("expected slide div to carry the align-left class, got: %s", html)
+	}
+}
