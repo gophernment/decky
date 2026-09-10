@@ -84,22 +84,38 @@ body {
   z-index: 1;
 }
 
+/* Title-less slides (full-bleed visual, a quote, a continuation slide) carry
+   no `#`/`##` heading, so the normal title-height allowance at the top is dead
+   space — pull the content up. `##`-titled slides keep the full padding; `###`
+   and below are in-slide sub-headings, not the slide title, so they don't
+   count. `cover` is centered and opts out. Specificity here (two :has()
+   negations) intentionally beats `.slide.two-cols` / split `padding`. */
+.slide:not(.cover):not(:has(> h1)):not(:has(> h2)):not(:has(> .split-header)) {
+  padding-top: 1.75rem;
+}
+
 /* Fallback/Base styles for markdown headers in custom layouts */
 .slide h1 {
   font-size: 2.5rem;
   font-weight: 700;
   margin-top: 0;
-  margin-bottom: 2rem;
+  margin-bottom: 1.25rem;
   color: var(--slide-text-color, var(--text-primary));
   font-family: var(--font-heading, var(--font-sans));
 }
 
+/* `##` is the compact slide title: prominent (accent-colored, near-h1 size)
+   but a much smaller vertical footprint than `#` — no underline rule, tight
+   gap to the content below. Use it on content-dense slides; use `#` for
+   cover/section/impact slides. `.slide.cover h2` below overrides this back to
+   a plain subtitle. */
 .slide h2 {
-  font-size: 2rem;
+  font-size: 1.9rem;
   font-weight: 700;
   margin-top: 0;
-  margin-bottom: 1.5rem;
-  color: var(--slide-text-color, var(--text-primary));
+  margin-bottom: 0.8rem;
+  letter-spacing: -0.02em;
+  color: var(--accent-primary);
   font-family: var(--font-heading, var(--font-sans));
 }
 
@@ -199,12 +215,32 @@ body {
   text-shadow: 0 10px 30px rgba(59, 130, 246, 0.2);
 }
 
+/* Escape hatch for a gradient heading (cover `h1`, or any level given a
+   gradient via `headingColors`). `background-clip: text` + transparent fill
+   clip every glyph in the heading to the gradient — including emoji and other
+   color glyphs, which come out blanked or mis-painted. Wrap those runs so
+   they paint in their own colors: `# <span class="no-clip">🐹</span> Decky`.
+   The heading's own `background-clip` still only paints the plain-text
+   glyphs; the span keeps an opaque fill so the gradient can't bleed through. */
+.slide h1 .no-clip,
+.slide h2 .no-clip,
+.slide h3 .no-clip,
+.slide h4 .no-clip {
+  -webkit-text-fill-color: currentColor;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  background: none;
+  text-shadow: none;
+}
+
 .slide.cover h2,
 .slide.cover p {
   font-size: 1.5rem;
   color: var(--slide-text-color, var(--text-secondary));
   font-weight: 400;
+  letter-spacing: normal;
   margin-top: 0.5rem;
+  margin-bottom: 1.5rem;
   max-width: 80%;
   line-height: 1.5;
 }
@@ -219,10 +255,10 @@ body {
   font-size: 2.5rem;
   font-weight: 700;
   margin-top: 0;
-  margin-bottom: 2rem;
+  margin-bottom: 1.25rem;
   color: var(--slide-text-color, var(--text-primary));
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  padding-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
   letter-spacing: -0.02em;
 }
 
@@ -240,13 +276,21 @@ body {
   font-size: 2.5rem;
   font-weight: 700;
   margin-top: 0;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  padding-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+}
+
+/* `##` used as the slide title on a two-cols slide (i.e. the slide's first
+   element) spans both columns, like `#` does. A `##` deeper in the flow is a
+   column heading, not the title, so it stays in its cell. Base `.slide h2`
+   styles the look; this only places it on the grid. */
+.slide.two-cols > h2:first-child {
+  grid-column: span 2;
 }
 
 /* Distribute child elements in columns for two-cols layout */
-.slide.two-cols > *:not(h1) {
+.slide.two-cols > *:not(h1):not(h2:first-child) {
   /* By default let CSS grid place them */
 }
 

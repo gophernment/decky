@@ -130,6 +130,17 @@ color: "#ffffff"
 - `cover`: Centered cover page layout with gradient background support. Add `align: left` (or `right`) to a slide to keep the large cover heading but stop centering the content.
 - `two-cols`: Dual-column layout (useful for side-by-side text/images or text/code blocks).
 
+### Slide Titles
+A slide's title is just a Markdown heading — pick the level by how much room the slide can spare.
+- `#` (h1): high-impact title — large, with an accent rule and a generous gap below. Best for `cover` slides, section dividers, and sparse slides.
+- `##` (h2): compact title — accent-colored and nearly as large, but a small gap to the content. The default for content-dense slides (lists, tables, code, `two-cols`, splits). On a `two-cols` slide a leading `#`/`##` spans both columns.
+- `###` / `####`: sub-headings inside the slide body, not the slide title.
+- No heading: fine, and common — a full-bleed image, a pull quote, or a continuation slide. decky reduces the top padding so the content isn't stranded under an empty title band.
+
+One title per slide — a `#` **or** a `##`. Recolor the `##` title with `headingColors.h2` if the accent default doesn't suit the deck.
+
+Emoji inside a gradient heading (a `cover` `#`, or any level given a gradient via `headingColors`) get clipped to the gradient and render blank or discolored. Wrap them so they keep their own colors: `# <span class="no-clip">🚀</span> Launch Plan`.
+
 ### Deck-wide Custom CSS
 Put a `css:` block in the **global** frontmatter (Slide 0) for overrides that apply to every slide. It is emitted after decky's built-in stylesheet, so any rule you write wins the cascade. Works in `serve`, `/presenter`, `export`, and `html`.
 

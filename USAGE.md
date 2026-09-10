@@ -12,7 +12,7 @@ background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)"
 color: "#ffffff"
 ---
 
-# Decky Usage Guide 🐹
+# Decky Usage Guide <span class="no-clip">🐹</span>
 ### A complete, runnable tour of every feature
 
 This deck is a real `.md` file — run it with `decky serve USAGE.md`
@@ -135,7 +135,7 @@ color: "#f8fafc"
 
 # 4. Per-Slide Config Reference
 
-## Local frontmatter keys
+### Local frontmatter keys
 - `layout` — one of `default`, `cover`, `two-cols`, `split-h`, `split-v`, `split-3`, `grid-4`
 - `background` — any CSS `background` value (color, gradient, image URL)
 - `color` — the slide's base text color
@@ -143,7 +143,7 @@ color: "#f8fafc"
 - `headerFont` — overrides just this slide's `<h1>` font
 - `fragments` — step-reveal this slide's list items one at a time (see slide 20)
 
-## Split-layout-only keys
+### Split-layout-only keys
 - `ratio` — e.g. `"60/40"` for `split-h`/`split-v`, `"30/40/30"` for `split-3`
 - `cols` / `rows` — independent ratios, `grid-4` only
 
@@ -208,12 +208,12 @@ color: "#f8fafc"
 
 # 7. Layout: `two-cols`
 
-## Left-ish content
+### Left-ish content
 A CSS-grid two-column layout. Headings and paragraphs auto-flow into the
 grid — good for a quick side-by-side without needing `::left::`/`::right::`
 markers.
 
-## Right-ish content
+### Right-ish content
 For precise control over what goes in which column, prefer the newer
 `split-h` layout (slide 12) instead — it lets you address each side
 explicitly by name.
@@ -222,10 +222,10 @@ explicitly by name.
 ---
 layout: "two-cols"
 ---
-# Title
-## Section A
+## Title            # a leading `#`/`##` spans both columns
+### Section A
 ...
-## Section B
+### Section B
 ...
 ```
 
@@ -323,7 +323,7 @@ color: "#f8fafc"
 
 # 11. Inline HTML & Styling
 
-## Raw HTML passes through
+### Raw HTML passes through
 Decky's markdown renderer allows raw HTML tags directly in your slide
 content — for one-off styling that frontmatter fields don't cover.
 
@@ -337,13 +337,13 @@ content — for one-off styling that frontmatter fields don't cover.
 </div>
 ```
 
-## Use sparingly
+### Use sparingly
 <span style="color:#f472b6; font-weight:700;">This text is pink</span> via
 the exact snippet above. Prefer `background`/`color`/`headerFont`
 frontmatter for whole-slide styling — reach for inline HTML only for
 small, one-off cases those fields don't reach.
 
-## Deck-wide CSS: the `css:` key
+### Deck-wide CSS: the `css:` key
 
 For overrides that apply to every slide, put a `css:` block in the
 **global** frontmatter (Slide 0). Its contents are emitted in a `<style>`
@@ -642,6 +642,52 @@ technique; anything else is treated as a solid CSS color. Merge is
 per-level: a level set in a slide's own headingColors overrides just that
 level, every other level still falls back to whatever was set globally on
 Slide 0.
+-->
+
+---
+layout: "default"
+background: "#0f172a"
+color: "#f8fafc"
+---
+
+## 22. Slide Titles: `#` vs `##` vs none
+
+The title is just a Markdown heading. Pick the level by how much room the
+slide can spare — this slide uses `##`, on purpose.
+
+- `#` (h1) — high-impact title: large, with an accent rule and a generous
+  gap below. For `cover` slides, section dividers, and sparse slides.
+- `##` (h2) — compact title: accent-colored, nearly as big, but a small
+  gap to the content. The default for busy slides — lists, tables, code,
+  `two-cols`, splits.
+- `###` / `####` — sub-headings *inside* the body, never the slide title.
+- No heading — a full-bleed image, a pull quote, or a continuation of the
+  slide before it. decky pulls the content up (less top padding) so it
+  doesn't float under an empty title band.
+
+**Emoji in a gradient heading** (a `cover` `#`, or any level given a
+gradient with `headingColors`) get clipped to the gradient and come out
+blank or discolored. Wrap them in `<span class="no-clip">` — this deck's
+cover title does exactly that.
+
+```markdown
+---
+layout: "default"
+---
+## Findings          # compact title, tight gap to the list
+
+- point one
+- point two
+
+# <span class="no-clip">🚀</span> Launch Plan   # emoji keeps its own colors
+```
+
+<!--
+One title per slide — a `#` OR a `##`, not both. Reach for `##` first;
+`#` earns its space only on cover/divider/sparse slides. On `cover`, `#`
+is the title and `###` the subtitle — a `##` there stays a plain
+subtitle, not a compact title. To recolor the `##` title away from its
+default accent, set headingColors.h2 (see slide 21).
 -->
 
 ---
