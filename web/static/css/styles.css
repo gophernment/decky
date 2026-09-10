@@ -218,15 +218,21 @@ body {
 /* Escape hatch for a gradient heading (cover `h1`, or any level given a
    gradient via `headingColors`). `background-clip: text` + transparent fill
    clip every glyph in the heading to the gradient — including emoji and other
-   color glyphs, which come out blanked or mis-painted. Wrap those runs so
-   they paint in their own colors: `# <span class="no-clip">🐹</span> Decky`.
-   The heading's own `background-clip` still only paints the plain-text
-   glyphs; the span keeps an opaque fill so the gradient can't bleed through. */
+   color glyphs, which come out as a flat gradient silhouette. Wrap those runs
+   so they paint in their own colors: `# <span class="no-clip">🐹</span> Decky`.
+
+   The opaque fill on the span is what defeats the clip, so it must NOT be
+   `currentColor`: the gradient `headingColors` path sets `color: transparent`
+   on the heading (see parser buildHeadingColorCSS), which the span would
+   inherit, and a transparent fill lets the parent gradient bleed straight
+   through the emoji again. Pin `color` / `-webkit-text-fill-color` to the
+   slide's own text color instead. */
 .slide h1 .no-clip,
 .slide h2 .no-clip,
 .slide h3 .no-clip,
 .slide h4 .no-clip {
-  -webkit-text-fill-color: currentColor;
+  color: var(--slide-text-color, var(--text-primary));
+  -webkit-text-fill-color: var(--slide-text-color, var(--text-primary));
   -webkit-background-clip: border-box;
   background-clip: border-box;
   background: none;
