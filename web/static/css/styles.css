@@ -403,6 +403,11 @@ pre {
   border-radius: 10px;
   padding: 1.25rem;
   overflow-x: auto;
+  /* .slide is a flex column, and overflow-x: auto makes <pre> a scroll
+     container whose automatic min-height is 0. Without this, a slide taller
+     than the viewport shrinks the code block to ~1 visible line instead of
+     overflowing the slide, forcing the presenter to scroll inside the code. */
+  flex-shrink: 0;
   font-family: var(--font-mono);
   font-size: 0.95rem;
   line-height: 1.5;

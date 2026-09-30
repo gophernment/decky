@@ -2,6 +2,7 @@ package web_test
 
 import (
 	"html/template"
+	"strings"
 	"testing"
 
 	"github.com/gophernment/decky/web"
@@ -23,6 +24,28 @@ func TestAssetsExist(t *testing.T) {
 				t.Fatalf("failed to read embedded file %s: %v", file, err)
 			}
 		})
+	}
+}
+
+// A code block inside the flex-column .slide must never be shrunk below its
+// natural height (it would show ~1 line and force the presenter to scroll).
+func TestPreDoesNotShrinkInSlide(t *testing.T) {
+	data, err := web.Assets.ReadFile("static/css/styles.css")
+	if err != nil {
+		t.Fatalf("failed to read styles.css: %v", err)
+	}
+	css := string(data)
+
+	start := strings.Index(css, "\npre {")
+	if start < 0 {
+		t.Fatal("styles.css has no top-level `pre {` rule")
+	}
+	end := strings.Index(css[start:], "}")
+	if end < 0 {
+		t.Fatal("unterminated `pre {` rule")
+	}
+	if !strings.Contains(css[start:start+end], "flex-shrink: 0") {
+		t.Error("`pre` rule must set flex-shrink: 0 so code blocks aren't squeezed inside the flex-column .slide")
 	}
 }
 
